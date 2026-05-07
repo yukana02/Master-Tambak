@@ -1,6 +1,6 @@
 @php
     $navLinks = [
-//        ['label' => 'Dashboard', 'route' => 'dashboard', 'active' => 'dashboard', 'roles' => null],
+        ['label' => 'Dashboard', 'route' => 'dashboard', 'active' => 'dashboard', 'roles' => null],
         ['label' => 'Kolam', 'route' => 'ponds.index', 'active' => 'ponds.*', 'roles' => 'Super Admin|Admin'],
 //        ['label' => 'Keuangan', 'route' => 'finance.index', 'active' => 'finance.*', 'roles' => 'Super Admin|Admin'],
 //        ['label' => 'Produk', 'route' => 'products.index', 'active' => 'products.*', 'roles' => 'Super Admin'],
