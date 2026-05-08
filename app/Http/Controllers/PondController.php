@@ -14,6 +14,10 @@ class PondController extends Controller
     {
         return view('ponds.index', [
             'ponds' => Pond::orderBy('y')->orderBy('x')->get(),
+            'pondTable' => Pond::query()
+                ->orderBy('name')
+                ->paginate(10)
+                ->withQueryString(),
         ]);
     }
 
