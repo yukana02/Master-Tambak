@@ -41,7 +41,7 @@
                     </div>
 
                     <div class="grid-stack w-[1200px] sm:w-[1560px] lg:w-[2040px]">
-                        @foreach ($ponds as $pond)
+                        @foreach ($pondTable as $pond)
                             @php
                                 $statusClass = ['active' => 'bg-emerald-100/90 text-emerald-950 border-emerald-400', 'soon' => 'bg-amber-100/90 text-amber-950 border-amber-400', 'overdue' => 'bg-red-100/90 text-red-950 border-red-400'][$pond->status];
                             @endphp
@@ -134,6 +134,10 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <div class="border-t border-slate-200 px-4 py-4">
+                {{ $pondTable->links() }}
             </div>
         </section>
     @endif
