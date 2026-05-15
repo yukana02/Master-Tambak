@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\Feed;
 use App\Models\Pond;
 use App\Models\Product;
 use App\Models\ProductCategory;
@@ -20,6 +21,7 @@ class DatabaseSeeder extends Seeder
         $permissions = [
             'manage roles',
             'manage ponds',
+            'manage feeds',
             'manage finance',
             'manage products',
             'use pos',
@@ -31,7 +33,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $superAdmin = Role::findOrCreate('Super Admin')->givePermissionTo($permissions);
-        $admin = Role::findOrCreate('Admin')->givePermissionTo(['manage ponds', 'manage finance', 'export reports']);
+        $admin = Role::findOrCreate('Admin')->givePermissionTo(['manage ponds', 'manage feeds', 'manage finance', 'export reports']);
         $kasir = Role::findOrCreate('Kasir')->givePermissionTo(['use pos']);
 
         User::updateOrCreate(
@@ -53,10 +55,20 @@ class DatabaseSeeder extends Seeder
         $feedCategory = Category::firstOrCreate(['name' => 'Pakan', 'type' => 'expense']);
         Category::firstOrCreate(['name' => 'Perawatan Kolam', 'type' => 'expense']);
 
+        $starterFeed = Feed::updateOrCreate(
+            ['name' => 'Pakan Pelet 781'],
+            [
+                'composition' => 'Protein, lemak, serat, dan mineral untuk pembesaran ikan konsumsi.',
+                'sack_weight_kg' => 30,
+                'fcr' => 1.5,
+                'is_active' => true,
+            ]
+        );
+
         Pond::insertOrIgnore([
-            ['name' => 'Kolam A1', 'fish_type' => 'Lele', 'fish_count' => 1500, 'stocking_date' => now()->subDays(35), 'harvest_date' => now()->addDays(25), 'x' => 0, 'y' => 0, 'width' => 3, 'height' => 2, 'notes' => 'Pertumbuhan stabil.', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Kolam B1', 'fish_type' => 'Nila', 'fish_count' => 900, 'stocking_date' => now()->subDays(80), 'harvest_date' => now()->addDays(8), 'x' => 3, 'y' => 0, 'width' => 3, 'height' => 2, 'notes' => 'Mendekati panen.', 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Kolam C1', 'fish_type' => 'Gurame', 'fish_count' => 400, 'stocking_date' => now()->subDays(150), 'harvest_date' => now()->subDays(3), 'x' => 6, 'y' => 0, 'width' => 3, 'height' => 2, 'notes' => 'Perlu jadwal panen.', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Kolam A1', 'fish_type' => 'Lele', 'fish_count' => 1500, 'feed_id' => $starterFeed->id, 'target_harvest_weight_kg' => 100, 'planned_feed_sacks' => 5, 'stocking_date' => now()->subDays(35), 'harvest_date' => now()->addDays(25), 'x' => 0, 'y' => 0, 'width' => 3, 'height' => 2, 'notes' => 'Pertumbuhan stabil.', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Kolam B1', 'fish_type' => 'Nila', 'fish_count' => 900, 'feed_id' => $starterFeed->id, 'target_harvest_weight_kg' => 80, 'planned_feed_sacks' => 3, 'stocking_date' => now()->subDays(80), 'harvest_date' => now()->addDays(8), 'x' => 3, 'y' => 0, 'width' => 3, 'height' => 2, 'notes' => 'Mendekati panen.', 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Kolam C1', 'fish_type' => 'Gurame', 'fish_count' => 400, 'feed_id' => $starterFeed->id, 'target_harvest_weight_kg' => 60, 'planned_feed_sacks' => 2, 'stocking_date' => now()->subDays(150), 'harvest_date' => now()->subDays(3), 'x' => 6, 'y' => 0, 'width' => 3, 'height' => 2, 'notes' => 'Perlu jadwal panen.', 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         $categories = collect(['Ikan', 'Pakan', 'Alat', 'Pupuk'])->mapWithKeys(fn (string $name) => [

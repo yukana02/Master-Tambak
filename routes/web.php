@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\FeedController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\PondController;
+use App\Http\Controllers\PondFeedingController;
+use App\Http\Controllers\PondHarvestController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -30,7 +33,12 @@ Route::middleware(['auth', 'role:Super Admin'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
+    Route::resource('feeds', FeedController::class);
+
     Route::resource('ponds', PondController::class);
+    Route::post('/ponds/{pond}/feedings', [PondFeedingController::class, 'store'])->name('ponds.feedings.store');
+    Route::delete('/ponds/{pond}/feedings/{feeding}', [PondFeedingController::class, 'destroy'])->name('ponds.feedings.destroy');
+    Route::post('/ponds/{pond}/harvests', [PondHarvestController::class, 'store'])->name('ponds.harvests.store');
     Route::post('/ponds-layout', [PondController::class, 'layout'])->name('ponds.layout');
 
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');

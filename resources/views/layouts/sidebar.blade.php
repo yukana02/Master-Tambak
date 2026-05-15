@@ -2,11 +2,12 @@
     $navLinks = [
         ['label' => 'Dashboard', 'route' => 'dashboard', 'active' => 'dashboard', 'roles' => null],
         ['label' => 'Kolam', 'route' => 'ponds.index', 'active' => 'ponds.*', 'roles' => 'Super Admin|Admin'],
-//        ['label' => 'Keuangan', 'route' => 'finance.index', 'active' => 'finance.*', 'roles' => 'Super Admin|Admin'],
-//        ['label' => 'Produk', 'route' => 'products.index', 'active' => 'products.*', 'roles' => 'Super Admin'],
-//        ['label' => 'Penjualan', 'route' => 'sales.index', 'active' => 'sales.*', 'roles' => 'Super Admin'],
-//        ['label' => 'Role', 'route' => 'roles.index', 'active' => 'roles.*', 'roles' => 'Super Admin'],
-//        ['label' => 'POS', 'route' => 'pos.index', 'active' => 'pos.*', 'roles' => 'Super Admin|Kasir'],
+        ['label' => 'Pakan', 'route' => 'feeds.index', 'active' => 'feeds.*', 'roles' => 'Super Admin|Admin'],
+        ['label' => 'Keuangan', 'route' => 'finance.index', 'active' => 'finance.*', 'roles' => 'Super Admin|Admin'],
+        ['label' => 'Produk', 'route' => 'products.index', 'active' => 'products.*', 'roles' => 'Super Admin'],
+        ['label' => 'Penjualan', 'route' => 'sales.index', 'active' => 'sales.*', 'roles' => 'Super Admin'],
+        ['label' => 'Role', 'route' => 'roles.index', 'active' => 'roles.*', 'roles' => 'Super Admin'],
+        ['label' => 'POS', 'route' => 'pos.index', 'active' => 'pos.*', 'roles' => 'Super Admin|Kasir'],
     ];
 @endphp
 

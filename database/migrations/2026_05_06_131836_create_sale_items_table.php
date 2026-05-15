@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // This migration is outdated - see 2026_05_16_000006 for cascade delete fix
         Schema::create('sale_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sale_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained()->restrictOnDelete();
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->string('product_name');
             $table->unsignedInteger('qty');
             $table->decimal('price', 14, 2);

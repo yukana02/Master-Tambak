@@ -14,7 +14,7 @@ class ProductController extends Controller
     public function index(): View
     {
         return view('products.index', [
-            'products' => Product::with('category')->latest()->paginate(15),
+            'products' => Product::with('category')->latest()->get(),
             'categories' => ProductCategory::orderBy('name')->get(),
         ]);
     }
@@ -60,9 +60,14 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
-        $product->delete();
+        try {
+            $productName = $product->name;
+            $product->delete();
 
-        return redirect()->route('products.index')->with('success', 'Produk berhasil dihapus.');
+            return redirect()->route('products.index')->with('success', "Produk '{$productName}' berhasil dihapus secara permanen.");
+        } catch (\Throwable $th) {
+            return back()->with('error', 'Terjadi kesalahan saat menghapus produk: ' . $th->getMessage());
+        }
     }
 
     public function storeCategory(Request $request): RedirectResponse

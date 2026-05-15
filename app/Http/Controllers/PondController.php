@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PondRequest;
+use App\Models\Feed;
 use App\Models\Pond;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,8 +14,9 @@ class PondController extends Controller
     public function index(): View
     {
         return view('ponds.index', [
-            'ponds' => Pond::orderBy('y')->orderBy('x')->get(),
+            'ponds' => Pond::with(['feed', 'feedings'])->orderBy('y')->orderBy('x')->get(),
             'pondTable' => Pond::query()
+                ->with(['feed', 'feedings'])
                 ->orderBy('name')
                 ->paginate(10)
                 ->withQueryString(),
@@ -23,7 +25,9 @@ class PondController extends Controller
 
     public function create(): View
     {
-        return view('ponds.create', ['pond' => new Pond]);
+        return view('ponds.create', [
+            'pond' => new Pond,
+        ]);
     }
 
     public function store(PondRequest $request): RedirectResponse
@@ -35,12 +39,19 @@ class PondController extends Controller
 
     public function show(Pond $pond): View
     {
-        return view('ponds.show', compact('pond'));
+        $pond->load(['feed', 'feedings.feed', 'harvests']);
+
+        return view('ponds.show', [
+            'pond' => $pond,
+            'feeds' => Feed::where('is_active', true)->orderBy('name')->get(),
+        ]);
     }
 
     public function edit(Pond $pond): View
     {
-        return view('ponds.edit', compact('pond'));
+        return view('ponds.edit', [
+            'pond' => $pond->load('feedings'),
+        ]);
     }
 
     public function update(PondRequest $request, Pond $pond): RedirectResponse

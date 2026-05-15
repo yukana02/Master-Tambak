@@ -27,6 +27,7 @@ class PondRequest extends FormRequest
             'notes' => ['nullable', 'string'],
             'fish_type' => ['required', 'string', 'max:255'],
             'fish_count' => ['required', 'integer', 'min:0'],
+            'target_harvest_weight_kg' => ['nullable', 'numeric', 'min:0.01'],
             'stocking_date' => ['nullable', 'date'],
             'harvest_date' => ['nullable', 'date', 'after_or_equal:stocking_date'],
             'x' => ['nullable', 'integer', 'min:0'],
