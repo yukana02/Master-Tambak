@@ -249,6 +249,7 @@
             let startY = 0;
             let scrollLeft = 0;
             let scrollTop = 0;
+            let isDirty = false;
 
             const applyZoom = (nextZoom) => {
                 zoom = Math.min(1.5, Math.max(0.1, Number(nextZoom.toFixed(2))));
@@ -303,10 +304,15 @@
                 viewport.classList.remove('cursor-grabbing');
             });
 
+            // Track layout changes
+            grid.on('change', () => { isDirty = true; });
+            window.onbeforeunload = () => isDirty ? 'Perubahan layout belum disimpan. Yakin ingin keluar?' : null;
+
             document.getElementById('layoutForm')?.addEventListener('submit', () => {
                 const items = grid.save(false).map(item => ({ id: item.id, x: item.x, y: item.y, w: item.w, h: item.h }));
                 document.getElementById('layoutItems').name = 'items_json';
                 document.getElementById('layoutItems').value = JSON.stringify(items);
+                isDirty = false;
             });
         });
     </script>
