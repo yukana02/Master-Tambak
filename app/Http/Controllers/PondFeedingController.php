@@ -14,7 +14,7 @@ class PondFeedingController extends Controller
     {
         $validated = $request->validated();
         $feed = Feed::findOrFail($validated['feed_id']);
-        $feedWeightKg = $validated['unit'] === 'sak'
+        $feedWeightKg = $validated['unit'] !== 'kg'
             ? (float) $validated['quantity'] * (float) $feed->sack_weight_kg
             : (float) $validated['quantity'];
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PondRequest;
 use App\Models\Feed;
+use App\Models\FeedCategory;
 use App\Models\Pond;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,11 +40,12 @@ class PondController extends Controller
 
     public function show(Pond $pond): View
     {
-        $pond->load(['feed', 'feedings.feed', 'harvests']);
+        $pond->load(['feed.category', 'feedings.feed.category', 'harvests']);
 
         return view('ponds.show', [
             'pond' => $pond,
-            'feeds' => Feed::where('is_active', true)->orderBy('name')->get(),
+            'feeds' => Feed::with('category')->where('is_active', true)->orderBy('name')->get(),
+            'feedCategories' => FeedCategory::orderBy('name')->get(),
         ]);
     }
 

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'notes', 'fish_type', 'fish_count', 'feed_id', 'target_harvest_weight_kg', 'planned_feed_sacks', 'stocking_date', 'harvest_date', 'x', 'y', 'width', 'height'])]
+#[Fillable(['name', 'notes', 'pond_size_notes', 'fish_type', 'fish_count', 'seed_source', 'dead_fish_count', 'feed_id', 'target_harvest_weight_kg', 'planned_feed_sacks', 'stocking_date', 'harvest_date', 'x', 'y', 'width', 'height'])]
 class Pond extends Model
 {
     protected function casts(): array
@@ -17,6 +17,7 @@ class Pond extends Model
             'stocking_date' => 'date',
             'harvest_date' => 'date',
             'fish_count' => 'integer',
+            'dead_fish_count' => 'integer',
             'target_harvest_weight_kg' => 'decimal:2',
             'planned_feed_sacks' => 'decimal:2',
             'x' => 'integer',
@@ -24,6 +25,11 @@ class Pond extends Model
             'width' => 'integer',
             'height' => 'integer',
         ];
+    }
+
+    public function getEstimatedLiveFishCountAttribute(): int
+    {
+        return max(0, $this->fish_count - $this->dead_fish_count);
     }
 
     public function feed(): BelongsTo

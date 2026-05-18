@@ -18,6 +18,13 @@
     <label class="block text-sm font-medium">Jumlah Ikan
         <input type="number" name="fish_count" value="{{ old('fish_count', $pond->fish_count ?? 0) }}" class="mt-1 w-full rounded-md border-slate-300" min="0" required>
     </label>
+    <label class="block text-sm font-medium">Sumber Bibit
+        <input name="seed_source" value="{{ old('seed_source', $pond->seed_source) }}" class="mt-1 w-full rounded-md border-slate-300" placeholder="Nama pemasok atau asal bibit">
+    </label>
+    <label class="block text-sm font-medium">Ikan Mati (catatan)
+        <input type="number" name="dead_fish_count" value="{{ old('dead_fish_count', $pond->dead_fish_count ?? 0) }}" class="mt-1 w-full rounded-md border-slate-300" min="0">
+        <span class="mt-1 block text-xs font-normal text-slate-500">Tidak mengubah jumlah ikan tebar.</span>
+    </label>
     <label class="block text-sm font-medium">Tanggal Tebar
         <input type="text" name="stocking_date" value="{{ old('stocking_date', optional($pond->stocking_date)->format('d/m/Y')) }}" class="datepicker mt-1 w-full rounded-md border-slate-300">
     </label>
@@ -49,6 +56,9 @@
 <div class="mt-4 grid gap-4 md:grid-cols-2">
     <label class="block text-sm font-medium">Catatan
         <textarea name="notes" class="mt-1 w-full rounded-md border-slate-300" rows="3">{{ old('notes', $pond->notes) }}</textarea>
+    </label>
+    <label class="block text-sm font-medium">Catatan Ukuran Kolam
+        <textarea name="pond_size_notes" class="mt-1 w-full rounded-md border-slate-300" rows="3" placeholder="Contoh: 8 x 12 m, kedalaman 1,2 m">{{ old('pond_size_notes', $pond->pond_size_notes) }}</textarea>
     </label>
 </div>
 <div class="mt-6 flex gap-3">

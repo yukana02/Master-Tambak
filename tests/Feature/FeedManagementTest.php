@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\Feed;
+use App\Models\FeedCategory;
 use App\Models\Pond;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -125,6 +127,71 @@ class FeedManagementTest extends TestCase
             'feed_weight_kg' => 20,
             'estimated_meat_kg' => 10,
         ]);
+    }
+
+    public function test_pond_show_summarizes_feed_totals_by_category_and_feed(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole(Role::create(['name' => 'Admin']));
+        $category = FeedCategory::create(['name' => 'Pembesaran']);
+        $feed = Feed::create([
+            'feed_category_id' => $category->id,
+            'name' => 'Pelet Summary',
+            'sack_weight_kg' => 30,
+            'fcr' => 1.5,
+            'is_active' => true,
+        ]);
+        $pond = Pond::create([
+            'name' => 'Kolam Summary',
+            'fish_type' => 'Lele',
+            'fish_count' => 1000,
+            'seed_source' => 'Pak Rasyid',
+            'dead_fish_count' => 12,
+            'pond_size_notes' => '10 x 20 m',
+        ]);
+
+        $this->actingAs($user)->post(route('ponds.feedings.store', $pond), [
+            'feed_id' => $feed->id,
+            'fed_at' => now()->toDateString(),
+            'quantity' => 2,
+            'unit' => 'pembesaran',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('ponds.show', $pond))
+            ->assertOk()
+            ->assertSee('Sumber Bibit')
+            ->assertSee('Pak Rasyid')
+            ->assertSee('Ikan Mati')
+            ->assertSee('12 ekor')
+            ->assertSee('10 x 20 m')
+            ->assertSee('Total Pakan Aktif')
+            ->assertSee('Pembesaran')
+            ->assertSee('Pelet Summary')
+            ->assertSee('60,00 pembesaran');
+    }
+
+    public function test_super_admin_can_create_user_from_role_menu(): void
+    {
+        $superAdmin = User::factory()->create();
+        $superAdmin->assignRole(Role::create(['name' => 'Super Admin']));
+        Role::create(['name' => 'Admin']);
+
+        $this->actingAs($superAdmin)
+            ->post(route('roles.users.store'), [
+                'name' => 'Operator Kolam',
+                'email' => 'operator@example.test',
+                'password' => 'password',
+                'password_confirmation' => 'password',
+                'role' => 'Admin',
+            ])
+            ->assertRedirect();
+
+        $user = User::where('email', 'operator@example.test')->first();
+
+        $this->assertNotNull($user);
+        $this->assertTrue(Hash::check('password', $user->password));
+        $this->assertTrue($user->hasRole('Admin'));
     }
 
     public function test_pond_list_shows_predicted_harvest_date_from_daily_average(): void

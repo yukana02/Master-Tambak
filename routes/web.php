@@ -28,11 +28,16 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'role:Super Admin'])->group(function () {
     Route::get('/roles', [RolePermissionController::class, 'index'])->name('roles.index');
+    Route::post('/roles/users', [RolePermissionController::class, 'storeUser'])->name('roles.users.store');
     Route::post('/roles/assign', [RolePermissionController::class, 'assign'])->name('roles.assign');
     Route::put('/roles/{role}/permissions', [RolePermissionController::class, 'syncPermissions'])->name('roles.permissions');
 });
 
 Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
+    Route::get('/feed-categories', [FeedController::class, 'categoriesIndex'])->name('feed-categories.index');
+    Route::post('/feed-categories', [FeedController::class, 'storeCategory'])->name('feed-categories.store');
+    Route::put('/feed-categories/{category}', [FeedController::class, 'updateCategory'])->name('feed-categories.update');
+    Route::delete('/feed-categories/{category}', [FeedController::class, 'destroyCategory'])->name('feed-categories.destroy');
     Route::resource('feeds', FeedController::class);
 
     Route::resource('ponds', PondController::class);

@@ -28,4 +28,9 @@ class PondFeeding extends Model
     {
         return $this->belongsTo(Feed::class);
     }
+
+    public function feedCategoryName(): string
+    {
+        return $this->feed?->category?->name ?? 'Tanpa Kategori';
+    }
 }

@@ -6,6 +6,7 @@ use App\Http\Requests\RolePermissionRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -28,6 +29,26 @@ class RolePermissionController extends Controller
         $user->syncRoles([$data['role']]);
 
         return back()->with('success', 'Role user berhasil diperbarui.');
+    }
+
+    public function storeUser(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'confirmed', Password::defaults()],
+            'role' => ['required', 'exists:roles,name'],
+        ]);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+        ]);
+
+        $user->assignRole($validated['role']);
+
+        return back()->with('success', 'User baru berhasil dibuat.');
     }
 
     public function syncPermissions(Request $request, Role $role): RedirectResponse

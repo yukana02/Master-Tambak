@@ -5,7 +5,35 @@
     </x-slot>
 
     <div class="space-y-6">
-        <div class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <div class="grid gap-6 xl:grid-cols-2">
+            <form method="POST" action="{{ route('roles.users.store') }}" class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
+                @csrf
+                <h2 class="mb-4 font-semibold">Tambah User</h2>
+                <div class="grid gap-4 md:grid-cols-2">
+                    <label class="block text-sm font-medium">Nama
+                        <input name="name" value="{{ old('name') }}" class="mt-1 w-full rounded-md border-slate-300" required>
+                    </label>
+                    <label class="block text-sm font-medium">Email
+                        <input type="email" name="email" value="{{ old('email') }}" class="mt-1 w-full rounded-md border-slate-300" required>
+                    </label>
+                    <label class="block text-sm font-medium">Password
+                        <input type="password" name="password" class="mt-1 w-full rounded-md border-slate-300" required>
+                    </label>
+                    <label class="block text-sm font-medium">Konfirmasi Password
+                        <input type="password" name="password_confirmation" class="mt-1 w-full rounded-md border-slate-300" required>
+                    </label>
+                    <label class="block text-sm font-medium md:col-span-2">Role
+                        <select name="role" class="mt-1 w-full rounded-md border-slate-300" required>
+                            @foreach ($roles as $role)
+                                <option value="{{ $role->name }}" @selected(old('role') === $role->name)>{{ $role->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                </div>
+                <button class="mt-5 w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white sm:w-auto">Tambah User</button>
+            </form>
+
+            <div class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
             <h2 class="mb-4 font-semibold">Assign Role User</h2>
             <form method="POST" action="{{ route('roles.assign') }}" class="grid gap-4 md:grid-cols-[1fr_1fr_auto]">
                 @csrf
@@ -24,9 +52,10 @@
                     </select>
                 </label>
                 <div class="flex items-end">
-                    <button class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Simpan</button>
+                    <button class="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white md:w-auto">Simpan</button>
                 </div>
             </form>
+            </div>
         </div>
 
         <div class="grid gap-6 xl:grid-cols-3">

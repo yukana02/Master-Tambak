@@ -3,7 +3,7 @@
     <label class="block text-sm font-medium">Nama Pakan
         <input name="name" value="{{ old('name', $feed->name) }}" class="mt-1 w-full rounded-md border-slate-300" required>
     </label>
-    <label class="block text-sm font-medium">Berat per Sak (kg)
+    <label class="block text-sm font-medium">Berat Pakan (kg)
         <input type="number" name="sack_weight_kg" value="{{ old('sack_weight_kg', $feed->sack_weight_kg) }}" class="mt-1 w-full rounded-md border-slate-300" min="0.01" step="0.01" required>
     </label>
     <label class="block text-sm font-medium">FCR
