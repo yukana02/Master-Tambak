@@ -4,28 +4,24 @@
         <p class="text-sm text-slate-500">Atur peta kolam dengan drag, resize, pan, zoom, lalu simpan layout.</p>
     </x-slot>
 
-    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div class="flex flex-wrap gap-2 text-sm">
-            <span class="rounded bg-emerald-100 px-2 py-1 text-emerald-800">Aktif</span>
-            <span class="rounded bg-sky-100 px-2 py-1 text-sky-800">Target tercapai</span>
-            <span class="rounded bg-amber-100 px-2 py-1 text-amber-800">Mendekati panen</span>
-            <span class="rounded bg-red-100 px-2 py-1 text-red-800">Terlambat panen</span>
-        </div>
-        <a href="{{ route('ponds.create') }}" class="inline-flex justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Tambah Kolam</a>
-    </div>
-
-    <form method="POST" action="{{ route('ponds.layout') }}" id="layoutForm" class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200 sm:p-4">
+    <form id="layoutForm" class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200 sm:p-4">
         @csrf
-        <input type="hidden" name="items" id="layoutItems">
         @if ($ponds->isEmpty())
             <div class="py-16 text-center text-slate-500">Belum ada kolam.</div>
         @else
-            <div class="mb-4 flex flex-col gap-3 border-b border-slate-200 pb-4 lg:flex-row lg:items-center lg:justify-between">
-                <div class="min-w-0">
-                    <h2 class="font-semibold text-slate-900">Peta Tambak</h2>
-                    <p class="text-sm text-slate-500">Geser area kosong untuk pan, gunakan tombol zoom untuk melihat area lebih luas.</p>
+            <div class="mb-4 flex flex-col gap-4 border-b border-slate-200 pb-4">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="min-w-0">
+                        <h2 class="font-semibold text-slate-900">Peta Tambak <span id="modeLabel" class="ml-2 rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">PREVIEW</span></h2>
+                        <p class="text-sm text-slate-500" id="modeDescription">Geser untuk pan peta. Gunakan Mode Edit untuk mengatur posisi kolam.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" id="toggleEditMode" class="inline-flex justify-center rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50">Mode Edit</button>
+                        <button type="submit" form="layoutForm" id="saveLayoutBtn" class="inline-flex justify-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">Simpan Layout</button>
+                        <a href="{{ route('ponds.create') }}" class="inline-flex justify-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Tambah Kolam</a>
+                    </div>
                 </div>
-                <div class="flex w-full items-center gap-2 sm:w-auto">
+                <div class="flex w-full items-center gap-2 sm:w-auto sm:justify-end">
                     <button type="button" id="zoomOut" class="min-h-10 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:flex-none">-</button>
                     <span id="zoomLabel" class="w-14 text-center text-sm font-semibold text-slate-700">100%</span>
                     <button type="button" id="zoomIn" class="min-h-10 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:flex-none">+</button>
@@ -64,7 +60,6 @@
 
             <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <p class="text-sm text-slate-500">Posisi dan ukuran kolam disimpan dalam koordinat grid peta.</p>
-                <button class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Simpan Layout</button>
             </div>
         @endif
     </form>
@@ -239,17 +234,25 @@
                 float: true,
                 margin: 10,
                 minRow: 12,
+                disableDrag: true, // Start disabled
+                disableResize: true,
             });
+
             const viewport = document.getElementById('pondMapViewport');
             const canvas = document.getElementById('pondMapCanvas');
             const zoomLabel = document.getElementById('zoomLabel');
+            const toggleEditBtn = document.getElementById('toggleEditMode');
+            const modeLabel = document.getElementById('modeLabel');
+            const modeDescription = document.getElementById('modeDescription');
+            const saveLayoutBtn = document.getElementById('saveLayoutBtn');
+            
             let zoom = 1;
             let isPanning = false;
             let startX = 0;
             let startY = 0;
             let scrollLeft = 0;
             let scrollTop = 0;
-            let isDirty = false;
+            let isEditMode = false;
 
             const applyZoom = (nextZoom) => {
                 zoom = Math.min(1.5, Math.max(0.1, Number(nextZoom.toFixed(2))));
@@ -257,7 +260,25 @@
                 zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
             };
 
-            // Responsive Map: set initial zoom based on screen width
+            // Toggle Mode
+            toggleEditBtn.addEventListener('click', () => {
+                isEditMode = !isEditMode;
+                grid.enableMove(isEditMode);
+                grid.enableResize(isEditMode);
+                
+                // Button shows the NEXT action
+                toggleEditBtn.textContent = isEditMode ? 'Mode Preview' : 'Mode Edit';
+                
+                // Visual feedback
+                toggleEditBtn.classList.toggle('bg-emerald-50', isEditMode);
+                toggleEditBtn.classList.toggle('ring-emerald-500', isEditMode);
+                modeLabel.textContent = isEditMode ? 'EDIT' : 'PREVIEW';
+                modeLabel.classList.toggle('bg-emerald-100', isEditMode);
+                modeLabel.classList.toggle('text-emerald-700', isEditMode);
+                modeDescription.textContent = isEditMode ? 'Mode Edit aktif: Anda bisa menggeser dan mengatur ukuran kolam.' : 'Mode Preview aktif: Geser untuk pan peta.';
+            });
+
+            // Responsive Map
             if (window.innerWidth < 640) applyZoom(0.5);
             else if (window.innerWidth < 1024) applyZoom(0.7);
             else applyZoom(1);
@@ -266,19 +287,9 @@
             document.getElementById('zoomIn')?.addEventListener('click', () => applyZoom(zoom + 0.1));
             document.getElementById('zoomReset')?.addEventListener('click', () => applyZoom(1));
 
-            viewport?.addEventListener('wheel', (event) => {
-                if (!event.ctrlKey) {
-                    return;
-                }
-
-                event.preventDefault();
-                applyZoom(zoom + (event.deltaY > 0 ? -0.1 : 0.1));
-            }, { passive: false });
-
+            // Pan logic: Only active when NOT in edit mode OR when target is not a grid item
             viewport?.addEventListener('pointerdown', (event) => {
-                if (event.target.closest('.grid-stack-item')) {
-                    return;
-                }
+                if (isEditMode && event.target.closest('.grid-stack-item')) return;
 
                 isPanning = true;
                 startX = event.clientX;
@@ -290,10 +301,7 @@
             });
 
             viewport?.addEventListener('pointermove', (event) => {
-                if (!isPanning) {
-                    return;
-                }
-
+                if (!isPanning) return;
                 viewport.scrollLeft = scrollLeft - (event.clientX - startX);
                 viewport.scrollTop = scrollTop - (event.clientY - startY);
             });
@@ -304,15 +312,29 @@
                 viewport.classList.remove('cursor-grabbing');
             });
 
-            // Track layout changes
-            grid.on('change', () => { isDirty = true; });
-            window.onbeforeunload = () => isDirty ? 'Perubahan layout belum disimpan. Yakin ingin keluar?' : null;
-
-            document.getElementById('layoutForm')?.addEventListener('submit', () => {
+            // AJAX Save Layout
+            document.getElementById('layoutForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
                 const items = grid.save(false).map(item => ({ id: item.id, x: item.x, y: item.y, w: item.w, h: item.h }));
-                document.getElementById('layoutItems').name = 'items_json';
-                document.getElementById('layoutItems').value = JSON.stringify(items);
-                isDirty = false;
+                
+                try {
+                    const response = await fetch('{{ route('ponds.layout') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value
+                        },
+                        body: JSON.stringify({ items_json: JSON.stringify(items) })
+                    });
+                    
+                    if (response.ok) {
+                        alert('Layout berhasil disimpan!');
+                    } else {
+                        throw new Error('Gagal menyimpan.');
+                    }
+                } catch (error) {
+                    alert(error.message);
+                }
             });
         });
     </script>
