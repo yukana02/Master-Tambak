@@ -6,26 +6,26 @@
 
     <div class="space-y-6">
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
-                <p class="text-sm font-bold uppercase tracking-wider text-slate-500">Total Pemasukan</p>
-                <p class="mt-2 text-2xl font-extrabold text-emerald-700">Rp {{ number_format($income, 0, ',', '.') }}</p>
+            <div class="rounded-lg bg-white p-4 sm:p-5 shadow-sm ring-1 ring-slate-200">
+                <p class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Total Pemasukan</p>
+                <p class="mt-2 text-xl sm:text-2xl font-extrabold text-emerald-700">Rp {{ number_format($income, 0, ',', '.') }}</p>
             </div>
-            <div class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
-                <p class="text-sm font-bold uppercase tracking-wider text-slate-500">Total Pengeluaran</p>
-                <p class="mt-2 text-2xl font-extrabold text-red-700">Rp {{ number_format($expense, 0, ',', '.') }}</p>
+            <div class="rounded-lg bg-white p-4 sm:p-5 shadow-sm ring-1 ring-slate-200">
+                <p class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Total Pengeluaran</p>
+                <p class="mt-2 text-xl sm:text-2xl font-extrabold text-red-700">Rp {{ number_format($expense, 0, ',', '.') }}</p>
             </div>
-            <div class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200 sm:col-span-2 lg:col-span-1">
-                <p class="text-sm font-bold uppercase tracking-wider text-slate-500">Saldo Saat Ini</p>
-                <p class="mt-2 text-2xl font-extrabold {{ $balance >= 0 ? 'text-emerald-700' : 'text-red-700' }}">Rp {{ number_format($balance, 0, ',', '.') }}</p>
+            <div class="rounded-lg bg-white p-4 sm:p-5 shadow-sm ring-1 ring-slate-200 sm:col-span-2 lg:col-span-1">
+                <p class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-500">Saldo Saat Ini</p>
+                <p class="mt-2 text-xl sm:text-2xl font-extrabold {{ $balance >= 0 ? 'text-emerald-700' : 'text-red-700' }}">Rp {{ number_format($balance, 0, ',', '.') }}</p>
             </div>
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-3">
-            <form method="POST" action="{{ route('finance.store') }}" class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200 lg:col-span-2">
+        <div class="grid gap-4 lg:grid-cols-3">
+            <form method="POST" action="{{ route('finance.store') }}" class="rounded-lg bg-white p-4 sm:p-5 shadow-sm ring-1 ring-slate-200 lg:col-span-2">
                 @csrf
                 <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <h2 class="font-semibold text-slate-900">Tambah Transaksi</h2>
-                    <a href="{{ route('exports.finance') }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 px-3 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 uppercase tracking-wider">EXPORT EXCEL</a>
+                    <a href="{{ route('exports.finance') }}" class="inline-flex items-center justify-center rounded-md border border-slate-300 px-3 py-2 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 uppercase tracking-wider">EXPORT EXCEL</a>
                 </div>
                 <div class="grid gap-4 sm:grid-cols-2">
                     <label class="block text-sm font-medium text-slate-700">Tipe
@@ -54,7 +54,7 @@
                 <button class="mt-5 w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-slate-800 sm:w-auto">SIMPAN TRANSAKSI</button>
             </form>
 
-            <form method="POST" action="{{ route('finance.categories.store') }}" class="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <form method="POST" action="{{ route('finance.categories.store') }}" class="rounded-lg bg-white p-4 sm:p-5 shadow-sm ring-1 ring-slate-200">
                 @csrf
                 <h2 class="mb-4 font-semibold text-slate-900">Kategori Baru</h2>
                 <div class="space-y-4">
@@ -75,7 +75,7 @@
             </form>
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-2">
+        <div class="grid gap-4 sm:grid-cols-2">
             <div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200 sm:p-5">
                 <h2 class="mb-4 font-semibold text-slate-900">Tren Bulanan</h2>
                 <div class="relative h-[200px] md:h-[300px] w-full">
@@ -84,7 +84,7 @@
             </div>
             <div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200 sm:p-5">
                 <h2 class="mb-4 font-semibold text-slate-900">Proporsi Kategori</h2>
-                <div class="relative h-[200px] md:h-[300px] w-full flex justify-center">
+                <div class="relative h-[200px] md:h-[300px] w-full">
                     <canvas id="financePieChart"></canvas>
                 </div>
             </div>
