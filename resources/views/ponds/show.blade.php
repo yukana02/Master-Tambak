@@ -53,22 +53,14 @@
         </div>
 
         <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            <div class="mb-4 flex items-center justify-between gap-3">
+            <div class="mb-4">
                 <h2 class="font-semibold text-slate-900">Perencanaan Pakan</h2>
-                <div class="flex gap-2">
-                    <a href="#feedings-section" class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Input Pakan</a>
-                    <a href="#harvest-section" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Panen</a>
-                </div>
             </div>
             <dl class="grid gap-4 md:grid-cols-3">
-                <div><dt class="text-sm text-slate-500">Pakan</dt><dd class="font-semibold">{{ $pond->feed?->name ?? '-' }}</dd></div>
                 <div><dt class="text-sm text-slate-500">Target Daging</dt><dd class="font-semibold">{{ $pond->target_harvest_weight_kg ? number_format($pond->target_harvest_weight_kg, 2, ',', '.') . ' kg' : '-' }}</dd></div>
-                <div><dt class="text-sm text-slate-500">Rencana Pakan</dt><dd class="font-semibold">{{ $pond->planned_feed_sacks ? number_format($pond->planned_feed_sacks, 2, ',', '.') . ' sak' : '-' }}</dd></div>
                 <div><dt class="text-sm text-slate-500">Total Pakan Aktual</dt><dd class="font-semibold">{{ $pond->actual_feed_weight_kg > 0 ? number_format($pond->actual_feed_weight_kg, 2, ',', '.') . ' kg' : '-' }}</dd></div>
                 <div><dt class="text-sm text-slate-500">Total Konversi Aktual</dt><dd class="font-semibold">{{ $pond->actual_estimated_meat_kg > 0 ? number_format($pond->actual_estimated_meat_kg, 2, ',', '.') . ' kg' : '-' }}</dd></div>
                 <div><dt class="text-sm text-slate-500">Rata-rata Harian</dt><dd class="font-semibold">{{ $pond->daily_estimated_meat_kg ? number_format($pond->daily_estimated_meat_kg, 2, ',', '.') . ' kg/hari' : '-' }}</dd></div>
-                <div><dt class="text-sm text-slate-500">Estimasi Rencana</dt><dd class="font-semibold">{{ $pond->planned_estimated_harvest_weight_kg ? number_format($pond->planned_estimated_harvest_weight_kg, 2, ',', '.') . ' kg' : '-' }}</dd></div>
-                <div><dt class="text-sm text-slate-500">Kebutuhan Sak untuk Target</dt><dd class="font-semibold">{{ $pond->required_feed_sacks ? number_format($pond->required_feed_sacks, 2, ',', '.') . ' sak' : '-' }}</dd></div>
                 <div><dt class="text-sm text-slate-500">Progress Target</dt><dd class="font-semibold">{{ $pond->harvest_progress_percent ? number_format($pond->harvest_progress_percent, 1, ',', '.') . '%' : '-' }}</dd></div>
             </dl>
         </div>
