@@ -12,15 +12,26 @@ use Illuminate\View\View;
 
 class PondController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = $request->input('search');
+        $pondTableQuery = Pond::query()
+            ->with(['feed', 'feedings'])
+            ->orderBy('name');
+
+        if (!empty($search)) {
+            $pondTableQuery->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('fish_type', 'like', "%{$search}%")
+                  ->orWhereHas('feed', function($q2) use ($search) {
+                      $q2->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
         return view('ponds.index', [
             'ponds' => Pond::with(['feed', 'feedings'])->orderBy('y')->orderBy('x')->get(),
-            'pondTable' => Pond::query()
-                ->with(['feed', 'feedings'])
-                ->orderBy('name')
-                ->paginate(10)
-                ->withQueryString(),
+            'pondTable' => $pondTableQuery->paginate(10)->withQueryString(),
         ]);
     }
 
@@ -38,12 +49,39 @@ class PondController extends Controller
         return redirect()->route('ponds.index')->with('success', 'Kolam berhasil dibuat.');
     }
 
-    public function show(Pond $pond): View
+    public function show(Pond $pond, Request $request): View
     {
-        $pond->load(['feed.category', 'feedings.feed.category', 'harvests']);
+        $pond->load(['feed.category', 'feedings.feed.category']);
+
+        $harvests = $pond->harvests()
+            ->orderByDesc('harvested_at')
+            ->paginate(5, ['*'], 'harvests_page')
+            ->withQueryString();
+
+        $search = $request->input('search_ponds');
+        $allPondsQuery = Pond::with(['feedings' => function($q) {
+                $q->orderBy('fed_at', 'desc')->with('feed');
+            }])
+            ->orderBy('name');
+
+        if (!empty($search)) {
+            $allPondsQuery->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('fish_type', 'like', "%{$search}%")
+                  ->orWhereHas('feedings.feed', function($q2) use ($search) {
+                      $q2->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $allPonds = $allPondsQuery
+            ->paginate(5, ['*'], 'ponds_page')
+            ->withQueryString();
 
         return view('ponds.show', [
             'pond' => $pond,
+            'harvests' => $harvests,
+            'allPonds' => $allPonds,
             'feeds' => Feed::with('category')->where('is_active', true)->orderBy('name')->get(),
             'feedCategories' => FeedCategory::orderBy('name')->get(),
         ]);

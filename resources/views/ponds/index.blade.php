@@ -67,10 +67,23 @@
     @if ($ponds->isNotEmpty())
         <section 
             x-data="{ 
-                search: '',
+                search: '{{ request('search', '') }}',
                 isLoading: false,
+                async init() {
+                    this.$watch('search', value => this.fetchPonds());
+                },
+                async fetchPonds() {
+                    this.isLoading = true;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('search', this.search);
+                    url.searchParams.set('page', 1);
+                    await this.loadUrl(url.toString());
+                },
                 async goToPage(url) {
                     if (!url || this.isLoading) return;
+                    await this.loadUrl(url);
+                },
+                async loadUrl(url) {
                     this.isLoading = true;
                     try {
                         const response = await fetch(url, {
@@ -80,12 +93,10 @@
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(html, 'text/html');
                         
-                        // Update table body and pagination
                         document.getElementById('pondTableContainer').innerHTML = doc.getElementById('pondTableContainer').innerHTML;
                         document.getElementById('pondCardContainer').innerHTML = doc.getElementById('pondCardContainer').innerHTML;
                         document.getElementById('paginationContainer').innerHTML = doc.getElementById('paginationContainer').innerHTML;
                         
-                        // Update URL without reload
                         window.history.pushState({}, '', url);
                     } catch (error) {
                         console.error('Pagination error:', error);
@@ -149,7 +160,7 @@
                                 $statusBadge = ['active' => 'bg-emerald-100 text-emerald-800', 'ready' => 'bg-sky-100 text-sky-800', 'soon' => 'bg-amber-100 text-amber-800', 'overdue' => 'bg-red-100 text-red-800'][$pond->status];
                                 $searchText = Str::lower($pond->name.' '.$pond->fish_type.' '.$statusLabel.' '.$pond->notes.' '.$pond->feed?->name);
                             @endphp
-                            <tr x-show="!search || {{ Js::from($searchText) }}.includes(search.toLowerCase())">
+                            <tr>
                                 <td class="whitespace-nowrap px-4 py-3 font-medium text-slate-900">{{ $pond->name }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">
                                     <span class="rounded px-2 py-1 text-xs font-semibold {{ $statusBadge }}">{{ $statusLabel }}</span>
@@ -180,7 +191,7 @@
                             $statusBadge = ['active' => 'bg-emerald-100 text-emerald-800', 'ready' => 'bg-sky-100 text-sky-800', 'soon' => 'bg-amber-100 text-amber-800', 'overdue' => 'bg-red-100 text-red-800'][$pond->status];
                             $searchText = Str::lower($pond->name.' '.$pond->fish_type.' '.$statusLabel.' '.$pond->notes.' '.$pond->feed?->name);
                         @endphp
-                        <div x-show="!search || {{ Js::from($searchText) }}.includes(search.toLowerCase())" class="p-4 space-y-3">
+                        <div class="p-4 space-y-3">
                             <div class="flex items-start justify-between">
                                 <div>
                                     <div class="font-bold text-slate-900">{{ $pond->name }}</div>
@@ -311,6 +322,23 @@
                 viewport.releasePointerCapture(event.pointerId);
                 viewport.classList.remove('cursor-grabbing');
             });
+
+            // Prevent drag/pan interception when clicking action links
+            canvas?.addEventListener('pointerdown', (e) => {
+                if (e.target.closest('a')) {
+                    e.stopPropagation();
+                }
+            }, true);
+            canvas?.addEventListener('mousedown', (e) => {
+                if (e.target.closest('a')) {
+                    e.stopPropagation();
+                }
+            }, true);
+            canvas?.addEventListener('click', (e) => {
+                if (e.target.closest('a')) {
+                    e.stopPropagation();
+                }
+            }, true);
 
             // AJAX Save Layout
             document.getElementById('layoutForm')?.addEventListener('submit', async (e) => {

@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
         // Global date format conversion for incoming requests
         $request = app('request');
         if ($request && ! $request->isMethod('get')) {
-            $dateFields = ['stocking_date', 'harvest_date', 'fed_at', 'harvested_at'];
+            $dateFields = ['stocking_date', 'harvest_date', 'fed_at', 'harvested_at', 'transaction_date'];
             $data = $request->all();
             $changed = false;
 
