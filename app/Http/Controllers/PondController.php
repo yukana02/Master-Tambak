@@ -108,7 +108,7 @@ class PondController extends Controller
         return redirect()->route('ponds.index')->with('success', 'Kolam berhasil dihapus.');
     }
 
-    public function layout(Request $request): RedirectResponse
+    public function layout(Request $request): \Symfony\Component\HttpFoundation\Response
     {
         if ($request->filled('items_json')) {
             $request->merge(['items' => json_decode($request->string('items_json')->toString(), true)]);
@@ -119,8 +119,8 @@ class PondController extends Controller
             'items.*.id' => ['required', 'exists:ponds,id'],
             'items.*.x' => ['required', 'integer', 'min:0'],
             'items.*.y' => ['required', 'integer', 'min:0'],
-            'items.*.w' => ['required', 'integer', 'min:1', 'max:12'],
-            'items.*.h' => ['required', 'integer', 'min:1', 'max:8'],
+            'items.*.w' => ['required', 'integer', 'min:1', 'max:24'],
+            'items.*.h' => ['required', 'integer', 'min:1', 'max:24'],
         ]);
 
         foreach ($validated['items'] as $item) {
@@ -130,6 +130,10 @@ class PondController extends Controller
                 'width' => $item['w'],
                 'height' => $item['h'],
             ]);
+        }
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Layout kolam berhasil disimpan.']);
         }
 
         return back()->with('success', 'Layout kolam berhasil disimpan.');

@@ -346,10 +346,12 @@
                 const items = grid.save(false).map(item => ({ id: item.id, x: item.x, y: item.y, w: item.w, h: item.h }));
                 
                 try {
-                    const response = await fetch('{{ route('ponds.layout') }}', {
+                    const response = await fetch('/ponds-layout', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
                             'X-CSRF-TOKEN': document.querySelector('input[name=_token]').value
                         },
                         body: JSON.stringify({ items_json: JSON.stringify(items) })
@@ -358,7 +360,9 @@
                     if (response.ok) {
                         alert('Layout berhasil disimpan!');
                     } else {
-                        throw new Error('Gagal menyimpan.');
+                        const errData = await response.json().catch(() => ({}));
+                        const errMsg = errData.message || 'Gagal menyimpan.';
+                        throw new Error(errMsg);
                     }
                 } catch (error) {
                     alert(error.message);
