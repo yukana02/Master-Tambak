@@ -129,7 +129,7 @@
                 </div>
             </div>
 
-            <div class="overflow-x-auto relative">
+            <div class="max-h-[520px] overflow-y-auto overflow-x-auto relative">
                 <div x-show="isLoading" class="absolute inset-0 z-10 flex items-center justify-center bg-white/50 backdrop-blur-[1px]">
                     <svg class="h-8 w-8 animate-spin text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -139,18 +139,18 @@
 
                 {{-- Desktop Table View --}}
                 <table class="hidden min-w-full divide-y divide-slate-200 text-sm lg:table">
-                    <thead class="bg-slate-50 text-left text-slate-500">
+                    <thead class="bg-slate-50 text-left text-slate-500 sticky top-0 z-10">
                         <tr>
-                            <th class="whitespace-nowrap px-4 py-3">Nama</th>
-                            <th class="whitespace-nowrap px-4 py-3">Status</th>
-                            <th class="whitespace-nowrap px-4 py-3">Jenis Ikan</th>
-                            <th class="whitespace-nowrap px-4 py-3">Jumlah</th>
-                            <th class="whitespace-nowrap px-4 py-3">Pakan</th>
-                            <th class="whitespace-nowrap px-4 py-3">Target</th>
-                            <th class="whitespace-nowrap px-4 py-3">Aktual Konversi</th>
-                            <th class="whitespace-nowrap px-4 py-3">Tebar</th>
-                            <th class="whitespace-nowrap px-4 py-3">Prediksi Panen</th>
-                            <th class="whitespace-nowrap px-4 py-3"></th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Nama</th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Status</th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Jenis Ikan</th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Jumlah</th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Pakan</th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Target</th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Aktual Konversi</th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Tebar</th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Prediksi Panen</th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50"></th>
                         </tr>
                     </thead>
                     <tbody id="pondTableContainer" class="divide-y divide-slate-100">
@@ -231,9 +231,7 @@
                 </div>
             </div>
 
-            <div id="paginationContainer" class="border-t border-slate-200 px-4 py-4">
-                {{ $pondTable->links() }}
-            </div>
+            <div id="paginationContainer" class="hidden"></div>
         </section>
     @endif
 

@@ -121,7 +121,7 @@
                 >
             </div>
             
-            <div class="overflow-x-auto relative">
+            <div class="max-h-[270px] overflow-y-auto overflow-x-auto relative">
                 <div x-show="isLoading" class="absolute inset-0 z-10 flex items-center justify-center bg-white/50 backdrop-blur-[1px]">
                     <svg class="h-8 w-8 animate-spin text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -131,12 +131,12 @@
 
                 {{-- Desktop Table View --}}
                 <table class="hidden min-w-full divide-y divide-slate-200 text-sm md:table">
-                    <thead class="bg-slate-50 text-left text-slate-500">
+                    <thead class="bg-slate-50 text-left text-slate-500 sticky top-0 z-10">
                         <tr>
-                            <th class="whitespace-nowrap px-4 py-3">Nama Kolam</th>
-                            <th class="whitespace-nowrap px-4 py-3">Pakan Terakhir</th>
-                            <th class="whitespace-nowrap px-4 py-3">Tanggal Pakan Terakhir</th>
-                            <th class="whitespace-nowrap px-4 py-3"></th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Nama Kolam</th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Pakan Terakhir</th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Tanggal Pakan Terakhir</th>
+                            <th class="whitespace-nowrap px-4 py-3 bg-slate-50"></th>
                         </tr>
                     </thead>
                     <tbody id="pondListTableContainer" class="divide-y divide-slate-100">
@@ -204,9 +204,7 @@
                 </div>
             </div>
             
-            <div id="pondListPaginationContainer" class="border-t border-slate-200 px-4 py-4">
-                {{ $allPonds->links() }}
-            </div>
+            <div id="pondListPaginationContainer" class="hidden"></div>
         </section>
 
         <section id="feedings-section" class="grid gap-6 xl:grid-cols-3">

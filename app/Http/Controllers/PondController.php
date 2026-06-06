@@ -31,7 +31,7 @@ class PondController extends Controller
 
         return view('ponds.index', [
             'ponds' => Pond::with(['feed', 'feedings'])->orderBy('y')->orderBy('x')->get(),
-            'pondTable' => $pondTableQuery->paginate(10)->withQueryString(),
+            'pondTable' => $pondTableQuery->get(),
         ]);
     }
 
@@ -74,9 +74,7 @@ class PondController extends Controller
             });
         }
 
-        $allPonds = $allPondsQuery
-            ->paginate(5, ['*'], 'ponds_page')
-            ->withQueryString();
+        $allPonds = $allPondsQuery->get();
 
         return view('ponds.show', [
             'pond' => $pond,
