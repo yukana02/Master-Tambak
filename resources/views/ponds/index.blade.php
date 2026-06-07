@@ -58,9 +58,6 @@
                 </div>
             </div>
 
-            <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                <p class="text-sm text-slate-500">Posisi dan ukuran kolam disimpan dalam koordinat grid peta.</p>
-            </div>
         @endif
     </form>
 
@@ -129,7 +126,7 @@
                 </div>
             </div>
 
-            <div class="max-h-[520px] overflow-y-auto overflow-x-auto relative">
+            <div class="max-h-[320px] lg:max-h-[520px] overflow-y-auto overflow-x-auto relative">
                 <div x-show="isLoading" class="absolute inset-0 z-10 flex items-center justify-center bg-white/50 backdrop-blur-[1px]">
                     <svg class="h-8 w-8 animate-spin text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

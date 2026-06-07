@@ -61,6 +61,7 @@
         <textarea name="pond_size_notes" class="mt-1 w-full rounded-md border-slate-300" rows="3" placeholder="Contoh: 8 x 12 m, kedalaman 1,2 m">{{ old('pond_size_notes', $pond->pond_size_notes) }}</textarea>
     </label>
 </div>
+
 <div class="mt-6 flex gap-3">
     <button class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Simpan</button>
     <a href="{{ route('ponds.index') }}" class="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold">Batal</a>

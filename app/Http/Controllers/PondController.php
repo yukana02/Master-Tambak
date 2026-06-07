@@ -44,7 +44,15 @@ class PondController extends Controller
 
     public function store(PondRequest $request): RedirectResponse
     {
-        Pond::create($request->validated());
+        $validated = $request->validated();
+        $nextY = (int) Pond::query()->selectRaw('COALESCE(MAX(y + height), 0) as max_bottom')->value('max_bottom');
+
+        $validated['x'] = 0;
+        $validated['y'] = $nextY + 1;
+        $validated['width'] ??= 3;
+        $validated['height'] ??= 2;
+
+        Pond::create($validated);
 
         return redirect()->route('ponds.index')->with('success', 'Kolam berhasil dibuat.');
     }
