@@ -259,6 +259,15 @@
             let scrollLeft = 0;
             let scrollTop = 0;
             let isEditMode = false;
+            let hasUnsavedLayout = false;
+
+            const markLayoutDirty = () => {
+                hasUnsavedLayout = true;
+            };
+
+            const clearLayoutDirty = () => {
+                hasUnsavedLayout = false;
+            };
 
             const applyZoom = (nextZoom) => {
                 zoom = Math.min(1.5, Math.max(0.1, Number(nextZoom.toFixed(2))));
@@ -282,6 +291,18 @@
                 modeLabel.classList.toggle('bg-emerald-100', isEditMode);
                 modeLabel.classList.toggle('text-emerald-700', isEditMode);
                 modeDescription.textContent = isEditMode ? 'Mode Edit aktif: Anda bisa menggeser dan mengatur ukuran kolam.' : 'Mode Preview aktif: Geser untuk pan peta.';
+            });
+
+            grid.on('change', () => {
+                if (isEditMode) markLayoutDirty();
+            });
+
+            grid.on('dragstop', () => {
+                if (isEditMode) markLayoutDirty();
+            });
+
+            grid.on('resizestop', () => {
+                if (isEditMode) markLayoutDirty();
             });
 
             // Responsive Map
@@ -353,6 +374,7 @@
                     });
                     
                     if (response.ok) {
+                        clearLayoutDirty();
                         alert('Layout berhasil disimpan!');
                     } else {
                         const errData = await response.json().catch(() => ({}));
@@ -361,6 +383,13 @@
                     }
                 } catch (error) {
                     alert(error.message);
+                }
+            });
+
+            window.addEventListener('beforeunload', (e) => {
+                if (hasUnsavedLayout) {
+                    e.preventDefault();
+                    e.returnValue = '';
                 }
             });
         });
