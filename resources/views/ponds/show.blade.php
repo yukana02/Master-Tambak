@@ -649,8 +649,8 @@
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
                                     @php $harvestInputCount = $harvest->harvestInputs->count(); @endphp
                                     @if($harvestInputCount > 0)
+                                        <div x-data="{ show: false }">
                                         <button
-                                            x-data="{ show: false }"
                                             @click="show = true"
                                             class="text-xs font-semibold text-sky-700 underline hover:text-sky-900"
                                         >
@@ -696,8 +696,9 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    @endif
-                                </td>
+                                    </div>
+                                @endif
+                            </td>
                             </tr>
                         @empty
                             <tr><td colspan="8" class="px-4 py-12 text-center text-slate-500">Belum ada riwayat panen.</td></tr>
@@ -741,9 +742,8 @@
                             @endif
                             @php $harvestInputCount = $harvest->harvestInputs->count(); @endphp
                             @if($harvestInputCount > 0)
-                                <div class="pt-2">
+                                <div class="pt-2" x-data="{ show: false }">
                                     <button
-                                        x-data="{ show: false }"
                                         @click="show = true"
                                         class="text-xs font-semibold text-sky-700 underline hover:text-sky-900"
                                     >
