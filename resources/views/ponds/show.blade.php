@@ -630,6 +630,7 @@
                             <th class="whitespace-nowrap px-4 py-3">Konversi</th>
                             <th class="whitespace-nowrap px-4 py-3">Catatan Pakan</th>
                             <th class="whitespace-nowrap px-4 py-3">Catatan</th>
+                            <th class="whitespace-nowrap px-4 py-3"></th>
                         </tr>
                     </thead>
                     <tbody id="harvestTableContainer" class="divide-y divide-slate-100">
@@ -645,9 +646,61 @@
                                 <td class="whitespace-nowrap px-4 py-3">{{ number_format($harvest->total_estimated_meat_kg, 2, ',', '.') }} kg</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ $harvest->feeding_count }}</td>
                                 <td class="min-w-48 px-4 py-3">{{ $harvest->notes ?: '-' }}</td>
+                                <td class="whitespace-nowrap px-4 py-3 text-right">
+                                    @php $harvestInputCount = $harvest->harvestInputs->count(); @endphp
+                                    @if($harvestInputCount > 0)
+                                        <button
+                                            x-data="{ show: false }"
+                                            @click="show = true"
+                                            class="text-xs font-semibold text-sky-700 underline hover:text-sky-900"
+                                        >
+                                            Lihat Catatan ({{ $harvestInputCount }})
+                                        </button>
+                                        <div x-show="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" @click.self="show = false" x-cloak>
+                                            <div class="mx-4 w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
+                                                <div class="mb-4 flex items-center justify-between">
+                                                    <h3 class="font-semibold text-slate-900">Detail Catatan Panen – {{ $harvest->harvested_at->format('d/m/Y') }}</h3>
+                                                    <button @click="show = false" class="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
+                                                </div>
+                                                <div class="overflow-x-auto">
+                                                    <table class="min-w-full divide-y divide-slate-200 text-sm">
+                                                        <thead class="bg-slate-50 text-left text-slate-500">
+                                                            <tr>
+                                                                <th class="px-3 py-2">Tanggal</th>
+                                                                <th class="px-3 py-2">Bakul</th>
+                                                                <th class="px-3 py-2">Kg</th>
+                                                                <th class="px-3 py-2">Harga/Kg</th>
+                                                                <th class="px-3 py-2">Total</th>
+                                                                <th class="px-3 py-2">Catatan</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="divide-y divide-slate-100">
+                                                            @forelse($harvest->harvestInputs as $hi)
+                                                                <tr>
+                                                                    <td class="px-3 py-2 whitespace-nowrap">{{ $hi->harvested_at->format('d/m/Y') }}</td>
+                                                                    <td class="px-3 py-2 whitespace-nowrap">{{ $hi->bucket_name }}</td>
+                                                                    <td class="px-3 py-2 whitespace-nowrap">{{ number_format($hi->kg, 2, ',', '.') }} kg</td>
+                                                                    <td class="px-3 py-2 whitespace-nowrap">Rp {{ number_format($hi->price_per_kg, 0, ',', '.') }}</td>
+                                                                    <td class="px-3 py-2 whitespace-nowrap font-semibold">Rp {{ number_format($hi->total_price, 2, ',', '.') }}</td>
+                                                                    <td class="px-3 py-2">{{ $hi->notes ?: '-' }}</td>
+                                                                </tr>
+                                                            @empty
+                                                                <tr><td colspan="6" class="px-3 py-6 text-center text-slate-500">Tidak ada catatan detail.</td></tr>
+                                                            @endforelse
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <div class="mt-3 text-right text-sm text-slate-600">
+                                                    <strong>Total:</strong> {{ number_format($harvest->harvestInputs->sum('kg'), 2, ',', '.') }} kg
+                                                    – Rp {{ number_format($harvest->harvestInputs->sum('total_price'), 2, ',', '.') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </td>
                             </tr>
                         @empty
-                            <tr><td colspan="7" class="px-4 py-12 text-center text-slate-500">Belum ada riwayat panen.</td></tr>
+                            <tr><td colspan="8" class="px-4 py-12 text-center text-slate-500">Belum ada riwayat panen.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -684,6 +737,58 @@
                             @if($harvest->notes)
                                 <div class="text-xs bg-slate-50 p-2 rounded text-slate-600">
                                     <strong class="text-slate-700">Catatan:</strong> {{ $harvest->notes }}
+                                </div>
+                            @endif
+                            @php $harvestInputCount = $harvest->harvestInputs->count(); @endphp
+                            @if($harvestInputCount > 0)
+                                <div class="pt-2">
+                                    <button
+                                        x-data="{ show: false }"
+                                        @click="show = true"
+                                        class="text-xs font-semibold text-sky-700 underline hover:text-sky-900"
+                                    >
+                                        Lihat Catatan ({{ $harvestInputCount }})
+                                    </button>
+                                    <div x-show="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" @click.self="show = false" x-cloak>
+                                        <div class="mx-4 w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
+                                            <div class="mb-4 flex items-center justify-between">
+                                                <h3 class="font-semibold text-slate-900">Detail Catatan Panen – {{ $harvest->harvested_at->format('d/m/Y') }}</h3>
+                                                <button @click="show = false" class="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
+                                            </div>
+                                            <div class="overflow-x-auto">
+                                                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                                                    <thead class="bg-slate-50 text-left text-slate-500">
+                                                        <tr>
+                                                            <th class="px-3 py-2">Tanggal</th>
+                                                            <th class="px-3 py-2">Bakul</th>
+                                                            <th class="px-3 py-2">Kg</th>
+                                                            <th class="px-3 py-2">Harga/Kg</th>
+                                                            <th class="px-3 py-2">Total</th>
+                                                            <th class="px-3 py-2">Catatan</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="divide-y divide-slate-100">
+                                                        @forelse($harvest->harvestInputs as $hi)
+                                                            <tr>
+                                                                <td class="px-3 py-2 whitespace-nowrap">{{ $hi->harvested_at->format('d/m/Y') }}</td>
+                                                                <td class="px-3 py-2 whitespace-nowrap">{{ $hi->bucket_name }}</td>
+                                                                <td class="px-3 py-2 whitespace-nowrap">{{ number_format($hi->kg, 2, ',', '.') }} kg</td>
+                                                                <td class="px-3 py-2 whitespace-nowrap">Rp {{ number_format($hi->price_per_kg, 0, ',', '.') }}</td>
+                                                                <td class="px-3 py-2 whitespace-nowrap font-semibold">Rp {{ number_format($hi->total_price, 2, ',', '.') }}</td>
+                                                                <td class="px-3 py-2">{{ $hi->notes ?: '-' }}</td>
+                                                            </tr>
+                                                        @empty
+                                                            <tr><td colspan="6" class="px-3 py-6 text-center text-slate-500">Tidak ada catatan detail.</td></tr>
+                                                        @endforelse
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="mt-3 text-right text-sm text-slate-600">
+                                                <strong>Total:</strong> {{ number_format($harvest->harvestInputs->sum('kg'), 2, ',', '.') }} kg
+                                                – Rp {{ number_format($harvest->harvestInputs->sum('total_price'), 2, ',', '.') }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             @endif
                         </div>

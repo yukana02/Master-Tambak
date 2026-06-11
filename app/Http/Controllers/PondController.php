@@ -62,6 +62,7 @@ class PondController extends Controller
         $pond->load(['feed.category', 'feedings.feed.category']);
 
         $harvests = $pond->harvests()
+            ->with('harvestInputs')
             ->orderByDesc('harvested_at')
             ->paginate(5, ['*'], 'harvests_page')
             ->withQueryString();
