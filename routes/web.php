@@ -7,6 +7,7 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\PondController;
 use App\Http\Controllers\PondFeedingController;
 use App\Http\Controllers\PondHarvestController;
+use App\Http\Controllers\PondHarvestInputController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -44,6 +45,10 @@ Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
     Route::post('/ponds/{pond}/feedings', [PondFeedingController::class, 'store'])->name('ponds.feedings.store');
     Route::delete('/ponds/{pond}/feedings/{feeding}', [PondFeedingController::class, 'destroy'])->name('ponds.feedings.destroy');
     Route::post('/ponds/{pond}/harvests', [PondHarvestController::class, 'store'])->name('ponds.harvests.store');
+    Route::post('/ponds/{pond}/inputs', [PondHarvestInputController::class, 'store'])->name('ponds.inputs.store');
+    Route::put('/ponds/{pond}/inputs/{input}', [PondHarvestInputController::class, 'update'])->name('ponds.inputs.update');
+    Route::delete('/ponds/{pond}/inputs/{input}', [PondHarvestInputController::class, 'destroy'])->name('ponds.inputs.destroy');
+    Route::get('/ponds/{pond}/inputs/export', [PondHarvestInputController::class, 'export'])->name('ponds.inputs.export');
     Route::post('/ponds-layout', [PondController::class, 'layout'])->name('ponds.layout');
 
     Route::get('/finance', [FinanceController::class, 'index'])->name('finance.index');
