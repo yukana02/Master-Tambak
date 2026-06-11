@@ -15,7 +15,11 @@ class PondHarvestController extends Controller
         $pond->load('feedings');
 
         DB::transaction(function () use ($pond, $validated): void {
-            $pond->harvests()->create([
+            // Get all draft harvest inputs
+            $draftInputs = $pond->harvestInputs()->where('status', 'draft')->get();
+
+            // Create the pond_harvest record
+            $harvest = $pond->harvests()->create([
                 'harvested_at' => $validated['harvested_at'],
                 'fish_type' => $pond->fish_type,
                 'fish_count' => $pond->fish_count,
@@ -27,6 +31,14 @@ class PondHarvestController extends Controller
                 'feeding_count' => $pond->feedings->count(),
                 'notes' => $validated['notes'] ?? null,
             ]);
+
+            // Archive all draft inputs to this harvest
+            if ($draftInputs->isNotEmpty()) {
+                $pond->harvestInputs()->where('status', 'draft')->update([
+                    'pond_harvest_id' => $harvest->id,
+                    'status' => 'final',
+                ]);
+            }
 
             $pond->feedings()->delete();
             $pond->update([
