@@ -90,6 +90,7 @@ class PondController extends Controller
             'allPonds' => $allPonds,
             'feeds' => Feed::with('category')->where('is_active', true)->orderBy('name')->get(),
             'feedCategories' => FeedCategory::orderBy('name')->get(),
+            'inputs' => $pond->harvestInputs()->orderByDesc('harvested_at')->get(),
         ]);
     }
 
