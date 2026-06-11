@@ -251,17 +251,17 @@
                     <h2 class="font-semibold text-slate-900">Riwayat Pemberian Pakan</h2>
                     <p class="text-sm text-slate-500">Total konversi aktual dari catatan ini dipakai untuk progress panen.</p>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto max-h-[400px] overflow-y-auto relative">
                     <table class="min-w-full divide-y divide-slate-200 text-sm">
-                        <thead class="bg-slate-50 text-left text-slate-500">
+                        <thead class="bg-slate-50 text-left text-slate-500 sticky top-0 z-10">
                             <tr>
-                                <th class="whitespace-nowrap px-4 py-3">Tanggal</th>
-                                <th class="whitespace-nowrap px-4 py-3">Pakan</th>
-                                <th class="whitespace-nowrap px-4 py-3">Input</th>
-                                <th class="whitespace-nowrap px-4 py-3">Kg Pakan</th>
-                                <th class="whitespace-nowrap px-4 py-3">Konversi Daging</th>
-                                <th class="whitespace-nowrap px-4 py-3">Catatan</th>
-                                <th class="whitespace-nowrap px-4 py-3"></th>
+                                <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Tanggal</th>
+                                <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Pakan</th>
+                                <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Input</th>
+                                <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Kg Pakan</th>
+                                <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Konversi Daging</th>
+                                <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Catatan</th>
+                                <th class="whitespace-nowrap px-4 py-3 bg-slate-50"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
