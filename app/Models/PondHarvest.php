@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['pond_id', 'harvested_at', 'fish_type', 'fish_count', 'target_harvest_weight_kg', 'total_feed_weight_kg', 'total_estimated_meat_kg', 'feeding_started_at', 'feeding_ended_at', 'feeding_count', 'notes'])]
 class PondHarvest extends Model
@@ -25,5 +26,10 @@ class PondHarvest extends Model
     public function pond(): BelongsTo
     {
         return $this->belongsTo(Pond::class);
+    }
+
+    public function harvestInputs(): HasMany
+    {
+        return $this->hasMany(PondHarvestInput::class);
     }
 }

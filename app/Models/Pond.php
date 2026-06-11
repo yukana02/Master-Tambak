@@ -47,6 +47,11 @@ class Pond extends Model
         return $this->hasMany(PondHarvest::class);
     }
 
+    public function harvestInputs(): HasMany
+    {
+        return $this->hasMany(PondHarvestInput::class);
+    }
+
     public function getStatusAttribute(): string
     {
         if ($this->harvest_plan_status === 'ready') {
