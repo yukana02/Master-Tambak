@@ -344,6 +344,191 @@
             </div>
         </section>
 
+        {{-- Input Panen Section --}}
+        <section
+            x-data="{
+                inputs: @js($inputs->toArray()),
+                editId: null,
+                editForm: { harvested_at: '', bucket_name: '', kg: '', price_per_kg: '', notes: '' },
+                get summary() {
+                    const totalKg = this.inputs.reduce((s, i) => s + parseFloat(i.kg || 0), 0);
+                    const totalUang = this.inputs.reduce((s, i) => s + parseFloat(i.total_price || 0), 0);
+                    return { totalKg, totalUang };
+                },
+                calcTotal() {
+                    const kg = parseFloat(this.editForm.kg) || 0;
+                    const price = parseFloat(this.editForm.price_per_kg) || 0;
+                    return kg * price;
+                },
+                startEdit(input) {
+                    this.editId = input.id;
+                    this.editForm = {
+                        harvested_at: input.harvested_at ? new Date(input.harvested_at + 'T00:00:00').toLocaleDateString('id-ID') : '',
+                        bucket_name: input.bucket_name || '',
+                        kg: input.kg || '',
+                        price_per_kg: input.price_per_kg || '',
+                        notes: input.notes || '',
+                    };
+                },
+                cancelEdit() {
+                    this.editId = null;
+                    this.editForm = { harvested_at: '', bucket_name: '', kg: '', price_per_kg: '', notes: '' };
+                }
+            }"
+            class="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200"
+        >
+            {{-- Summary Card --}}
+            <div class="border-b border-slate-200 px-4 py-4 sm:px-6">
+                <h2 class="font-semibold text-slate-900">Input Panen</h2>
+                <p class="text-sm text-slate-500">Catat panen bertahap tanpa mengubah data konversi kolam.</p>
+            </div>
+            <div class="grid gap-4 px-4 py-4 sm:grid-cols-2 sm:px-6">
+                <div class="rounded-md bg-emerald-50 p-4 ring-1 ring-emerald-200">
+                    <div class="text-xs font-semibold uppercase text-emerald-700">Total Panen</div>
+                    <div class="mt-1 text-2xl font-bold text-emerald-900" x-text="summary.totalKg.toLocaleString('id-ID', {minimumFractionDigits: 2}) + ' kg'"></div>
+                </div>
+                <div class="rounded-md bg-blue-50 p-4 ring-1 ring-blue-200">
+                    <div class="text-xs font-semibold uppercase text-blue-700">Total Pendapatan</div>
+                    <div class="mt-1 text-2xl font-bold text-blue-900" x-text="'Rp ' + summary.totalUang.toLocaleString('id-ID', {minimumFractionDigits: 2})"></div>
+                </div>
+            </div>
+
+            {{-- Form Input --}}
+            <div class="border-t border-slate-200 px-4 py-4 sm:px-6">
+                <form method="POST" action="{{ route('ponds.inputs.store', $pond) }}" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+                    @csrf
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Tanggal <span class="text-red-500">*</span></label>
+                        <input type="date" name="harvested_at" value="{{ old('harvested_at', now()->format('Y-m-d')) }}" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Nama Bakul <span class="text-red-500">*</span></label>
+                        <input type="text" name="bucket_name" value="{{ old('bucket_name') }}" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Kg <span class="text-red-500">*</span></label>
+                        <input type="number" name="kg" id="input-kg" value="{{ old('kg') }}" step="0.01" min="0.01" class="mt-1 w-full rounded-md border-slate-300 text-sm" required
+                            oninput="document.getElementById('input-total').value = (parseFloat(this.value) || 0) * (parseFloat(document.getElementById('input-price').value) || 0)">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Harga/Kg <span class="text-red-500">*</span></label>
+                        <input type="number" name="price_per_kg" id="input-price" value="{{ old('price_per_kg') }}" step="100" min="0" class="mt-1 w-full rounded-md border-slate-300 text-sm" required
+                            oninput="document.getElementById('input-total').value = (parseFloat(this.value) || 0) * (parseFloat(document.getElementById('input-kg').value) || 0)">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Total <span class="text-xs text-slate-400">(otomatis)</span></label>
+                        <input type="text" id="input-total" readonly class="mt-1 w-full rounded-md border-slate-200 bg-slate-50 text-sm font-semibold text-slate-900" value="0">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Catatan</label>
+                        <input type="text" name="notes" value="{{ old('notes') }}" class="mt-1 w-full rounded-md border-slate-300 text-sm">
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-6">
+                        <button class="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">Simpan Catatan Panen</button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- History Table --}}
+            <div class="border-t border-slate-200 overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-slate-50 text-left text-slate-500">
+                        <tr>
+                            <th class="whitespace-nowrap px-4 py-3">Tanggal</th>
+                            <th class="whitespace-nowrap px-4 py-3">Bakul</th>
+                            <th class="whitespace-nowrap px-4 py-3">Kg</th>
+                            <th class="whitespace-nowrap px-4 py-3">Harga/Kg</th>
+                            <th class="whitespace-nowrap px-4 py-3">Total</th>
+                            <th class="whitespace-nowrap px-4 py-3">Status</th>
+                            <th class="whitespace-nowrap px-4 py-3">Catatan</th>
+                            <th class="whitespace-nowrap px-4 py-3"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <template x-for="(input, idx) in inputs" :key="input.id">
+                            <tr>
+                                <td class="whitespace-nowrap px-4 py-3" x-text="input.harvested_at"></td>
+                                <td class="whitespace-nowrap px-4 py-3" x-text="input.bucket_name"></td>
+                                <td class="whitespace-nowrap px-4 py-3" x-text="parseFloat(input.kg).toLocaleString('id-ID', {minimumFractionDigits: 2})"></td>
+                                <td class="whitespace-nowrap px-4 py-3" x-text="'Rp ' + parseFloat(input.price_per_kg).toLocaleString('id-ID')"></td>
+                                <td class="whitespace-nowrap px-4 py-3 font-semibold" x-text="'Rp ' + parseFloat(input.total_price).toLocaleString('id-ID', {minimumFractionDigits: 2})"></td>
+                                <td class="whitespace-nowrap px-4 py-3">
+                                    <span x-show="input.status === 'draft'" class="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">Draft</span>
+                                    <span x-show="input.status === 'final'" class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">Final</span>
+                                </td>
+                                <td class="min-w-32 px-4 py-3" x-text="input.notes || '-'"></td>
+                                <td class="whitespace-nowrap px-4 py-3 text-right">
+                                    <template x-if="input.status === 'draft'">
+                                        <div class="flex justify-end gap-2">
+                                            <button @click="startEdit(input)" class="text-xs font-semibold text-slate-700 underline hover:text-slate-900">Edit</button>
+                                            <form method="POST" :action="`/ponds/${input.pond_id}/inputs/${input.id}`" onsubmit="return confirm('Hapus catatan panen ini?')">
+                                                @csrf @method('DELETE')
+                                                <button class="text-xs font-semibold text-red-700 underline hover:text-red-900">Hapus</button>
+                                            </form>
+                                        </div>
+                                    </template>
+                                </td>
+                            </tr>
+                        </template>
+                        <template x-if="inputs.length === 0">
+                            <tr>
+                                <td colspan="8" class="px-4 py-12 text-center text-slate-500">Belum ada catatan panen.</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Export Button --}}
+            <div class="border-t border-slate-200 px-4 py-3 sm:px-6">
+                <a href="{{ route('ponds.inputs.export', $pond) }}" class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm ring-1 ring-slate-300 hover:bg-slate-50">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Export Excel
+                </a>
+            </div>
+        </section>
+
+        {{-- Edit Modal --}}
+        <div
+            x-show="editId !== null"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            x-cloak
+            @click.self="cancelEdit()"
+        >
+            <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
+                <h3 class="mb-4 font-semibold text-slate-900">Edit Catatan Panen</h3>
+                <form method="POST" :action="`/ponds/{{ $pond->id }}/inputs/${editId}`" class="space-y-4">
+                    @csrf @method('PUT')
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700">Tanggal</label>
+                            <input type="date" name="harvested_at" x-model="editForm.harvested_at" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700">Nama Bakul</label>
+                            <input type="text" name="bucket_name" x-model="editForm.bucket_name" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700">Kg</label>
+                            <input type="number" name="kg" x-model="editForm.kg" step="0.01" min="0.01" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700">Harga/Kg</label>
+                            <input type="number" name="price_per_kg" x-model="editForm.price_per_kg" step="100" min="0" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Catatan</label>
+                        <textarea name="notes" x-model="editForm.notes" rows="2" class="mt-1 w-full rounded-md border-slate-300 text-sm"></textarea>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" @click="cancelEdit()" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-300">Batal</button>
+                        <button class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <section id="harvest-section" class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200">
             <div class="mb-4">
                 <h2 class="font-semibold text-slate-900">Konfirmasi Panen</h2>
