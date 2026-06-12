@@ -13,7 +13,7 @@
 
 <aside class="hidden h-screen w-64 shrink-0 flex-col border-r border-slate-200 bg-white lg:sticky lg:top-0 lg:flex">
     <div class="flex h-16 items-center border-b border-slate-200 px-6">
-        <a href="{{ route('dashboard') }}" class="text-lg font-semibold text-slate-950">Tambak Rasyid</a>
+        <a href="{{ route('dashboard') }}" class="text-lg font-semibold text-slate-950">AnasyrahFarm</a>
     </div>
 
     <nav class="flex-1 space-y-1 overflow-y-auto p-4 text-sm font-medium">
@@ -47,7 +47,7 @@
         class="relative flex h-full w-72 max-w-[85vw] flex-col bg-white shadow-xl"
     >
         <div class="flex h-16 items-center justify-between border-b border-slate-200 px-4">
-            <a href="{{ route('dashboard') }}" @click="sidebarOpen = false" class="font-semibold text-slate-950">Tambak Rasyid</a>
+            <a href="{{ route('dashboard') }}" @click="sidebarOpen = false" class="font-semibold text-slate-950">AnasyrahFarm</a>
             <button type="button" @click="sidebarOpen = false" class="inline-flex h-10 w-10 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100" aria-label="Tutup menu">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />

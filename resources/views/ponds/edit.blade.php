@@ -23,7 +23,7 @@
             }
         });
     </script>
-    <form method="POST" action="{{ route('ponds.destroy', $pond) }}" class="mt-4">
+    <form method="POST" action="{{ route('ponds.destroy', $pond) }}" class="mt-4" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kolam ini? Semua data terkait kolam akan ikut terhapus.');">
         @csrf @method('DELETE')
         <button class="rounded-md bg-red-700 px-4 py-2 text-sm font-semibold text-white">Hapus Kolam</button>
     </form>

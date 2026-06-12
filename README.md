@@ -1,4 +1,4 @@
-# Tambak Rasyid
+# AnasyrahFarm
 
 Aplikasi web Laravel untuk manajemen tambak, keuangan, POS, RBAC, dan export laporan Excel.
 

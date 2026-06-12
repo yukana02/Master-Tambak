@@ -7,27 +7,24 @@ use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class PondHarvestInputExport implements FromQuery, WithHeadings, WithMapping
+class PondHarvestExport implements FromQuery, WithHeadings, WithMapping
 {
-    private int $pondId;
+    private int $harvestId;
 
-    public function __construct(int $pondId)
+    public function __construct(int $harvestId)
     {
-        $this->pondId = $pondId;
+        $this->harvestId = $harvestId;
     }
 
     public function query()
     {
-        return PondHarvestInput::query()
-            ->where('pond_id', $this->pondId)
-            ->where('status', 'draft')
-            ->with('pond')
-            ->orderByDesc('harvested_at');
+        return PondHarvestInput::where('pond_harvest_id', $this->harvestId)
+            ->orderBy('harvested_at');
     }
 
     public function headings(): array
     {
-        return ['Tanggal', 'Nama Bakul', 'Kg', 'Harga/Kg', 'Total', 'Nama Kolam', 'Catatan'];
+        return ['Tanggal', 'Nama Bakul', 'Kg', 'Harga/Kg', 'Total', 'Catatan'];
     }
 
     public function map($row): array
@@ -38,7 +35,6 @@ class PondHarvestInputExport implements FromQuery, WithHeadings, WithMapping
             $row->kg,
             $row->price_per_kg,
             $row->total_price,
-            $row->pond?->name ?? '-',
             $row->notes ?? '-',
         ];
     }

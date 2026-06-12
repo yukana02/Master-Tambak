@@ -6,7 +6,7 @@
 
     <div class="mx-auto max-w-xl rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200">
         <div class="border-b border-slate-200 pb-4 text-center">
-            <h2 class="text-lg font-semibold">Tambak Rasyid</h2>
+            <h2 class="text-lg font-semibold">AnasyrahFarm</h2>
             <p class="text-sm text-slate-500">{{ $sale->sold_at->format('d M Y H:i') }}</p>
             <p class="text-sm text-slate-500">{{ $sale->invoice_number }}</p>
         </div>
@@ -63,7 +63,7 @@
     };
 
     function sendToWhatsApp() {
-        let message = `*Tambak Rasyid*\n`;
+        let message = `*AnasyrahFarm*\n`;
         message += `${saleData.date}\n`;
         message += `No: ${saleData.invoice}\n\n`;
 

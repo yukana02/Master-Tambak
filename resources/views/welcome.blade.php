@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Kolam Ikan An'nasrah</title>
+        <title>AnasyrahFarm</title>
 
         @fonts
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -12,7 +12,7 @@
     <body class="bg-slate-50 font-sans text-slate-900 antialiased">
         <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
             <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-                <a href="{{ url('/') }}" class="text-base font-semibold text-slate-950 sm:text-lg">Kolam Ikan An'nasrah</a>
+                <a href="{{ url('/') }}" class="text-base font-semibold text-slate-950 sm:text-lg">AnasyrahFarm</a>
                 <nav class="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
                     <a href="#profil" class="hover:text-slate-950">Profil</a>
                     <a href="#layanan" class="hover:text-slate-950">Layanan</a>
@@ -32,7 +32,7 @@
             <section class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:px-8 lg:py-16">
                 <div class="flex flex-col justify-center">
                     <p class="text-sm font-semibold uppercase tracking-wide text-emerald-700">Budidaya dan pengelolaan kolam ikan</p>
-                    <h1 class="mt-4 max-w-3xl text-4xl font-bold leading-tight text-slate-950 sm:text-5xl lg:text-6xl">Kolam Ikan An'nasrah</h1>
+                    <h1 class="mt-4 max-w-3xl text-4xl font-bold leading-tight text-slate-950 sm:text-5xl lg:text-6xl">AnasyrahFarm</h1>
                     <p class="mt-5 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
                         Area kolam ikan di kawasan Jombang, Jawa Timur, dengan fokus pada pengelolaan kolam, stok ikan, pencatatan transaksi, dan operasional penjualan yang tertata.
                     </p>
@@ -48,7 +48,7 @@
 
                 <div class="relative min-h-[420px] overflow-hidden rounded-lg border border-slate-200 bg-emerald-950 shadow-sm">
                     <iframe
-                        title="Lokasi Kolam Ikan An'nasrah"
+                        title="Lokasi AnasyrahFarm"
                         src="https://www.google.com/maps?q=-7.4806063,112.2777426&z=16&output=embed"
                         class="h-full min-h-[420px] w-full"
                         loading="lazy"
@@ -69,7 +69,7 @@
                     </div>
                     <div class="space-y-4 text-sm leading-7 text-slate-600 lg:col-span-2">
                         <p>
-                            Kolam Ikan An'nasrah dikelola sebagai area budidaya ikan dengan kebutuhan operasional yang lengkap: pendataan kolam, jadwal tebar dan panen, stok produk, transaksi POS, serta laporan keuangan.
+                            AnasyrahFarm dikelola sebagai area budidaya ikan dengan kebutuhan operasional yang lengkap: pendataan kolam, jadwal tebar dan panen, stok produk, transaksi POS, serta laporan keuangan.
                         </p>
                         <p>
                             Website ini juga terhubung dengan sistem internal Tambak Rasyid untuk membantu pengelola melihat kondisi kolam, mencatat pemasukan-pengeluaran, dan memproses penjualan secara lebih rapi.
@@ -111,7 +111,7 @@
                 <div class="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[.8fr_1.2fr] lg:px-8">
                     <div>
                         <p class="text-sm font-semibold uppercase tracking-wide text-emerald-700">Lokasi</p>
-                        <h2 class="mt-3 text-2xl font-bold text-slate-950">Kolam Ikan An'nasrah</h2>
+                        <h2 class="mt-3 text-2xl font-bold text-slate-950">AnasyrahFarm</h2>
                         <dl class="mt-6 space-y-4 text-sm">
                             <div>
                                 <dt class="font-semibold text-slate-950">Sumber data</dt>
@@ -129,7 +129,7 @@
                     </div>
 
                     <iframe
-                        title="Peta Kolam Ikan An'nasrah"
+                        title="Peta AnasyrahFarm"
                         src="https://www.google.com/maps?q=-7.4806063,112.2777426&z=17&output=embed"
                         class="h-[360px] w-full rounded-lg border border-slate-200"
                         loading="lazy"
@@ -141,7 +141,7 @@
 
         <footer class="border-t border-slate-200 bg-slate-950 text-white">
             <div class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-6 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-                <p class="font-semibold">Kolam Ikan An'nasrah</p>
+                <p class="font-semibold">AnasyrahFarm</p>
                 <p class="text-slate-300">Company profile dan sistem operasional Tambak Rasyid.</p>
             </div>
         </footer>

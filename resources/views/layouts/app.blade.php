@@ -33,7 +33,7 @@
                                     @isset($header)
                                         {{ $header }}
                                     @else
-                                        <h1 class="text-xl font-semibold text-slate-900">Tambak Rasyid</h1>
+                                        <h1 class="text-xl font-semibold text-slate-900">AnasyrahFarm</h1>
                                     @endisset
                                 </div>
                             </div>

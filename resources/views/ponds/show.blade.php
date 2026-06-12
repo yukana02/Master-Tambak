@@ -274,7 +274,7 @@
                                     <td class="whitespace-nowrap px-4 py-3">{{ number_format($feeding->estimated_meat_kg, 2, ',', '.') }} kg</td>
                                     <td class="min-w-48 px-4 py-3">{{ $feeding->notes ?: '-' }}</td>
                                     <td class="whitespace-nowrap px-4 py-3 text-right">
-                                        <form method="POST" action="{{ route('ponds.feedings.destroy', [$pond, $feeding]) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan pemberian pakan ini?');">
+                                        <form method="POST" action="{{ route('ponds.feedings.destroy', ['pond' => $pond->id, 'feeding' => $feeding->id]) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan pemberian pakan ini?');">
                                             @csrf @method('DELETE')
                                             <button class="font-semibold text-red-700 underline">Hapus</button>
                                         </form>
@@ -694,15 +694,23 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
-                                                <div class="mt-3 text-right text-sm text-slate-600">
-                                                    <strong>Total:</strong> {{ number_format($harvest->harvestInputs->sum('kg'), 2, ',', '.') }} kg
-                                                    – Rp {{ number_format($harvest->harvestInputs->sum('total_price'), 2, ',', '.') }}
+                                                <div class="mt-3 flex items-center justify-between gap-3 text-sm text-slate-600">
+                                                    <div>
+                                                        <strong>Total:</strong> {{ number_format($harvest->harvestInputs->sum('kg'), 2, ',', '.') }} kg
+                                                        – Rp {{ number_format($harvest->harvestInputs->sum('total_price'), 2, ',', '.') }}
+                                                    </div>
+                                                    <a href="{{ route('ponds.harvests.export', [$pond, $harvest]) }}" class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm ring-1 ring-slate-300 hover:bg-slate-50">
+                                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                        Export Excel
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                @endif
-                            </td>
+                                </div>
+                            @endif
+                        </td>
+
                             </tr>
                         @empty
                             <tr><td colspan="8" class="px-4 py-12 text-center text-slate-500">Belum ada riwayat panen.</td></tr>
@@ -787,9 +795,15 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <div class="mt-3 text-right text-sm text-slate-600">
-                                                <strong>Total:</strong> {{ number_format($harvest->harvestInputs->sum('kg'), 2, ',', '.') }} kg
-                                                – Rp {{ number_format($harvest->harvestInputs->sum('total_price'), 2, ',', '.') }}
+                                            <div class="mt-3 flex items-center justify-between gap-3 text-sm text-slate-600">
+                                                <div>
+                                                    <strong>Total:</strong> {{ number_format($harvest->harvestInputs->sum('kg'), 2, ',', '.') }} kg
+                                                    – Rp {{ number_format($harvest->harvestInputs->sum('total_price'), 2, ',', '.') }}
+                                                </div>
+                                                <a href="{{ route('ponds.harvests.export', [$pond, $harvest]) }}" class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm ring-1 ring-slate-300 hover:bg-slate-50">
+                                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                    Export Excel
+                                                </a>
                                             </div>
                                         </div>
                                     </div>

@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PondHarvestExport;
 use App\Http\Requests\PondHarvestRequest;
 use App\Models\Pond;
+use App\Models\PondHarvest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class PondHarvestController extends Controller
 {
@@ -15,10 +19,8 @@ class PondHarvestController extends Controller
         $pond->load('feedings');
 
         DB::transaction(function () use ($pond, $validated): void {
-            // Get all draft harvest inputs
             $draftInputs = $pond->harvestInputs()->where('status', 'draft')->get();
 
-            // Create the pond_harvest record
             $harvest = $pond->harvests()->create([
                 'harvested_at' => $validated['harvested_at'],
                 'fish_type' => $pond->fish_type,
@@ -32,7 +34,6 @@ class PondHarvestController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
-            // Archive all draft inputs to this harvest
             if ($draftInputs->isNotEmpty()) {
                 $pond->harvestInputs()->where('status', 'draft')->update([
                     'pond_harvest_id' => $harvest->id,
@@ -50,5 +51,14 @@ class PondHarvestController extends Controller
         });
 
         return redirect()->route('ponds.show', $pond)->with('success', 'Panen berhasil dikonfirmasi. Catatan pakan aktif sudah direset.');
+    }
+
+    public function export(Pond $pond, PondHarvest $harvest): BinaryFileResponse
+    {
+        abort_unless($harvest->pond_id === $pond->id, 404);
+
+        $filename = 'riwayat-panen-'.$pond->id.'-'.$harvest->id.'-'.now()->format('Ymd').'.xlsx';
+
+        return Excel::download(new PondHarvestExport($harvest->id), $filename);
     }
 }

@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Tambak Rasyid') }}</title>
+        <title>{{ config('app.name', 'AnasyrahFarm') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -22,7 +22,7 @@
                     <div class="relative p-10">
                         <a href="{{ url('/') }}" class="inline-flex items-center gap-3">
                             <span class="flex h-11 w-11 items-center justify-center rounded bg-emerald-500 text-lg font-bold text-slate-950">TR</span>
-                            <span class="text-lg font-semibold">Tambak Rasyid</span>
+                            <span class="text-lg font-semibold">AnasyrahFarm</span>
                         </a>
                     </div>
 
@@ -54,7 +54,7 @@
                             <a href="{{ url('/') }}" class="inline-flex items-center gap-3">
                                 <span class="flex h-10 w-10 items-center justify-center rounded bg-slate-900 text-sm font-bold text-white">TR</span>
                                 <span>
-                                    <span class="block font-semibold text-slate-950">Tambak Rasyid</span>
+                                    <span class="block font-semibold text-slate-950">AnasyrahFarm</span>
                                     <span class="block text-xs text-slate-500">Kolam Ikan An'nasrah</span>
                                 </span>
                             </a>
