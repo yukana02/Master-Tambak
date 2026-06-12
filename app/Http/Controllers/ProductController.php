@@ -66,7 +66,7 @@ class ProductController extends Controller
 
             return redirect()->route('products.index')->with('success', "Produk '{$productName}' berhasil dihapus secara permanen.");
         } catch (\Throwable $th) {
-            return back()->with('error', 'Terjadi kesalahan saat menghapus produk: ' . $th->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat menghapus produk: '.$th->getMessage());
         }
     }
 

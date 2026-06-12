@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -17,9 +20,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (config('app.env') === 'production' || env('FORCE_HTTPS', false)) {
-            \Illuminate\Support\Facades\URL::forceScheme('https');
+            URL::forceScheme('https');
         }
-        \Illuminate\Support\Facades\Date::serializeUsing(function (\Carbon\Carbon $date) {
+        Date::serializeUsing(function (Carbon $date) {
             return $date->format('d/m/Y');
         });
 
@@ -36,10 +39,11 @@ class AppServiceProvider extends ServiceProvider
                     // Check if format is dd/mm/yyyy
                     if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $value)) {
                         try {
-                            $date = \Carbon\Carbon::createFromFormat('d/m/Y', $value);
+                            $date = Carbon::createFromFormat('d/m/Y', $value);
                             $data[$field] = $date->format('Y-m-d');
                             $changed = true;
-                        } catch (\Exception $e) {}
+                        } catch (\Exception $e) {
+                        }
                     }
                 }
             }

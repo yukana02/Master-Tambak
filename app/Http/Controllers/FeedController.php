@@ -58,7 +58,7 @@ class FeedController extends Controller
     public function updateCategory(Request $request, FeedCategory $category): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:feed_categories,name,' . $category->id],
+            'name' => ['required', 'string', 'max:255', 'unique:feed_categories,name,'.$category->id],
         ]);
 
         $category->update($validated);
@@ -72,6 +72,7 @@ class FeedController extends Controller
             if ($request->wantsJson()) {
                 return response()->json(['message' => 'Kategori tidak bisa dihapus karena masih dipakai pakan.'], 422);
             }
+
             return back()->with('error', 'Kategori tidak bisa dihapus karena masih dipakai pakan.');
         }
 

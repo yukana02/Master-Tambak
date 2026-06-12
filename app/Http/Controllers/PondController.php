@@ -9,6 +9,7 @@ use App\Models\Pond;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class PondController extends Controller
 {
@@ -19,13 +20,13 @@ class PondController extends Controller
             ->with(['feed', 'feedings'])
             ->orderBy('name');
 
-        if (!empty($search)) {
-            $pondTableQuery->where(function($q) use ($search) {
+        if (! empty($search)) {
+            $pondTableQuery->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('fish_type', 'like', "%{$search}%")
-                  ->orWhereHas('feed', function($q2) use ($search) {
-                      $q2->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhere('fish_type', 'like', "%{$search}%")
+                    ->orWhereHas('feed', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -68,18 +69,18 @@ class PondController extends Controller
             ->withQueryString();
 
         $search = $request->input('search_ponds');
-        $allPondsQuery = Pond::with(['feedings' => function($q) {
-                $q->orderBy('fed_at', 'desc')->with('feed');
-            }])
+        $allPondsQuery = Pond::with(['feedings' => function ($q) {
+            $q->orderBy('fed_at', 'desc')->with('feed');
+        }])
             ->orderBy('name');
 
-        if (!empty($search)) {
-            $allPondsQuery->where(function($q) use ($search) {
+        if (! empty($search)) {
+            $allPondsQuery->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('fish_type', 'like', "%{$search}%")
-                  ->orWhereHas('feedings.feed', function($q2) use ($search) {
-                      $q2->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhere('fish_type', 'like', "%{$search}%")
+                    ->orWhereHas('feedings.feed', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -116,7 +117,7 @@ class PondController extends Controller
         return redirect()->route('ponds.index')->with('success', 'Kolam berhasil dihapus.');
     }
 
-    public function layout(Request $request): \Symfony\Component\HttpFoundation\Response
+    public function layout(Request $request): Response
     {
         if ($request->filled('items_json')) {
             $request->merge(['items' => json_decode($request->string('items_json')->toString(), true)]);

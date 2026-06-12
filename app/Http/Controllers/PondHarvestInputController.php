@@ -56,7 +56,7 @@ class PondHarvestInputController extends Controller
 
     public function export(Pond $pond): BinaryFileResponse
     {
-        $filename = 'panen_' . $pond->id . '_' . now()->format('Ymd') . '.xlsx';
+        $filename = 'panen_'.$pond->id.'_'.now()->format('Ymd').'.xlsx';
 
         return Excel::download(new PondHarvestInputExport($pond->id), $filename);
     }

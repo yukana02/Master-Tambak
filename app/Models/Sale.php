@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['invoice_number', 'subtotal', 'discount', 'total', 'payment_method', 'paid_amount', 'change_amount', 'sold_at'])]
 class Sale extends Model

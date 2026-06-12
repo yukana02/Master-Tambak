@@ -168,7 +168,8 @@ class FeedManagementTest extends TestCase
             ->assertSee('Total Pakan Aktif')
             ->assertSee('Pembesaran')
             ->assertSee('Pelet Summary')
-            ->assertSee('60,00 pembesaran');
+            ->assertSee('2,00 pembesaran')
+            ->assertSee('60,00 kg');
     }
 
     public function test_super_admin_can_create_user_from_role_menu(): void
