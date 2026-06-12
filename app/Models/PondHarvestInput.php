@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'kg',
     'price_per_kg',
     'total_price',
+    'payment_method',
+    'cash_amount',
+    'tf_amount',
     'notes',
     'status',
 ])]
@@ -26,6 +29,8 @@ class PondHarvestInput extends Model
             'kg' => 'decimal:2',
             'price_per_kg' => 'decimal:2',
             'total_price' => 'decimal:2',
+            'cash_amount' => 'decimal:2',
+            'tf_amount' => 'decimal:2',
         ];
     }
 

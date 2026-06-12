@@ -208,7 +208,7 @@
         </section>
 
         <section id="feedings-section" class="grid gap-6 xl:grid-cols-3">
-            <div x-data="{ feeds: @json($feeds->mapWithKeys(fn ($f) => [$f->id => $f->category?->name ? strtolower($f->category->name) : 'kg'])->all()), selectedFeedId: {{ old('feed_id', $pond->feed_id) ?: 'null' }}, selectedUnit: '{{ old('unit', $pond->feed?->category?->name ? strtolower($pond->feed->category->name) : 'kg') }}' }" x-init="$watch('selectedFeedId', val => { if (this.feeds[val]) this.selectedUnit = this.feeds[val]; })">
+            <div x-data="{ feeds: @json($feeds->mapWithKeys(fn ($f) => [$f->id => $f->category?->name ? strtolower($f->category->name) : 'kg'])->all()), selectedFeedId: {{ old('feed_id', $pond->feed_id) ?: 'null' }}, selectedUnit: '{{ old('unit', $pond->feed?->category?->name ? strtolower($pond->feed->category->name) : 'kg') }}' }" x-init="$watch('selectedFeedId', val => { if (val && feeds[val]) selectedUnit = feeds[val]; })">
                 <form method="POST" action="{{ route('ponds.feedings.store', $pond) }}" class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200">
                     @csrf
                     <h2 class="mb-4 font-semibold text-slate-900">Catat Pemberian Pakan</h2>
@@ -251,8 +251,9 @@
                     <h2 class="font-semibold text-slate-900">Riwayat Pemberian Pakan</h2>
                     <p class="text-sm text-slate-500">Total konversi aktual dari catatan ini dipakai untuk progress panen.</p>
                 </div>
-                <div class="overflow-x-auto max-h-[400px] overflow-y-auto relative">
-                    <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <div class="overflow-x-auto max-h-[50vh] overflow-y-auto relative">
+                    {{-- Desktop Table --}}
+                    <table class="hidden min-w-full divide-y divide-slate-200 text-sm md:table">
                         <thead class="bg-slate-50 text-left text-slate-500 sticky top-0 z-10">
                             <tr>
                                 <th class="whitespace-nowrap px-4 py-3 bg-slate-50">Tanggal</th>
@@ -285,6 +286,46 @@
                             @endforelse
                         </tbody>
                     </table>
+
+                    {{-- Mobile Card View --}}
+                    <div class="divide-y divide-slate-100 md:hidden">
+                        @forelse ($pond->feedings->sortByDesc('fed_at') as $feeding)
+                            <div class="p-4 space-y-2 text-sm">
+                                <div class="flex justify-between items-start">
+                                    <div class="font-bold text-slate-900">{{ $feeding->fed_at->format('d/m/Y') }}</div>
+                                    <form method="POST" action="{{ route('ponds.feedings.destroy', ['pond' => $pond->id, 'feeding' => $feeding->id]) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan pemberian pakan ini?');">
+                                        @csrf @method('DELETE')
+                                        <button class="text-xs font-semibold text-red-700 underline hover:text-red-900">Hapus</button>
+                                    </form>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-slate-600">
+                                    <div>
+                                        <div class="text-[10px] uppercase text-slate-400 font-semibold">Pakan</div>
+                                        <div class="font-medium">{{ $feeding->feed->name }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] uppercase text-slate-400 font-semibold">Input</div>
+                                        <div class="font-medium">{{ number_format($feeding->quantity, 2, ',', '.') }} {{ $feeding->unit }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] uppercase text-slate-400 font-semibold">Kg Pakan</div>
+                                        <div class="font-medium">{{ number_format($feeding->feed_weight_kg, 2, ',', '.') }} kg</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] uppercase text-slate-400 font-semibold">Konversi Daging</div>
+                                        <div class="font-medium">{{ number_format($feeding->estimated_meat_kg, 2, ',', '.') }} kg</div>
+                                    </div>
+                                </div>
+                                @if($feeding->notes)
+                                    <div class="text-xs bg-slate-50 p-2 rounded text-slate-600">
+                                        <strong class="text-slate-700">Catatan:</strong> {{ $feeding->notes }}
+                                    </div>
+                                @endif
+                            </div>
+                        @empty
+                            <div class="py-12 text-center text-slate-500">Belum ada catatan pemberian pakan.</div>
+                        @endforelse
+                    </div>
                 </div>
             </div>
         </section>
@@ -349,7 +390,18 @@
             x-data="{
                 inputs: @js($inputs->toArray()),
                 editId: null,
-                editForm: { harvested_at: '', bucket_name: '', kg: '', price_per_kg: '', notes: '' },
+                form: {
+                    payment_method: 'cash',
+                    cash_amount: 0,
+                    tf_amount: 0,
+                },
+                formReady: false,
+                editForm: { harvested_at: '', bucket_name: '', kg: '', price_per_kg: '', payment_method: 'cash', cash_amount: '', tf_amount: '', notes: '' },
+                init() {
+                    this.$nextTick(() => {
+                        this.syncAmounts();
+                    });
+                },
                 formatDate(d) {
                     if (!d) return '';
                     const parts = d.split('-');
@@ -360,10 +412,55 @@
                     const totalUang = this.inputs.reduce((s, i) => s + parseFloat(i.total_price || 0), 0);
                     return { totalKg, totalUang };
                 },
-                calcTotal() {
+                totalValue() {
                     const kg = parseFloat(this.editForm.kg) || 0;
                     const price = parseFloat(this.editForm.price_per_kg) || 0;
                     return kg * price;
+                },
+                inputTotal() {
+                    const kg = parseFloat(this.$refs.kg?.value || 0);
+                    const price = parseFloat(this.$refs.price?.value || 0);
+                    return kg * price;
+                },
+                syncAmounts() {
+                    const total = this.inputTotal();
+                    const method = this.form.payment_method || 'cash';
+                    this.form.payment_method = method;
+                    if (method === 'cash') {
+                        this.form.cash_amount = total || 0;
+                        this.form.tf_amount = 0;
+                    } else if (method === 'tf') {
+                        this.form.cash_amount = 0;
+                        this.form.tf_amount = total || 0;
+                    } else {
+                        const cash = Math.min(Math.max(parseFloat(this.form.cash_amount || 0), 0), total || 0);
+                        this.form.cash_amount = cash;
+                        this.form.tf_amount = Math.max(total - cash, 0);
+                    }
+                    this.$nextTick(() => {
+                        const totalEl = this.$refs.total;
+                        if (totalEl) totalEl.value = total || 0;
+                    });
+                },
+                ensureSubmitDefaults() {
+                    if (! this.form.payment_method) this.form.payment_method = 'cash';
+                    this.syncAmounts();
+                },
+                syncEditAmounts() {
+                    const total = this.totalValue();
+                    const method = this.editForm.payment_method || 'cash';
+                    this.editForm.payment_method = method;
+                    if (method === 'cash') {
+                        this.editForm.cash_amount = total;
+                        this.editForm.tf_amount = 0;
+                    } else if (method === 'tf') {
+                        this.editForm.cash_amount = 0;
+                        this.editForm.tf_amount = total;
+                    } else {
+                        const cash = Math.min(Math.max(parseFloat(this.editForm.cash_amount || 0), 0), total);
+                        this.editForm.cash_amount = cash;
+                        this.editForm.tf_amount = Math.max(total - cash, 0);
+                    }
                 },
                 startEdit(input) {
                     this.editId = input.id;
@@ -372,12 +469,16 @@
                         bucket_name: input.bucket_name || '',
                         kg: input.kg || '',
                         price_per_kg: input.price_per_kg || '',
+                        payment_method: input.payment_method || 'cash',
+                        cash_amount: input.cash_amount ?? '',
+                        tf_amount: input.tf_amount ?? '',
                         notes: input.notes || '',
                     };
+                    this.$nextTick(() => this.syncEditAmounts());
                 },
                 cancelEdit() {
                     this.editId = null;
-                    this.editForm = { harvested_at: '', bucket_name: '', kg: '', price_per_kg: '', notes: '' };
+                    this.editForm = { harvested_at: '', bucket_name: '', kg: '', price_per_kg: '', payment_method: 'cash', cash_amount: '', tf_amount: '', notes: '' };
                 }
             }"
             class="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200"
@@ -400,8 +501,10 @@
 
             {{-- Form Input --}}
             <div class="border-t border-slate-200 px-4 py-4 sm:px-6">
-                <form method="POST" action="{{ route('ponds.inputs.store', $pond) }}" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+                <form method="POST" action="{{ route('ponds.inputs.store', $pond) }}" x-ref="form" novalidate class="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
                     @csrf
+                    <input type="hidden" name="cash_amount" :value="form.cash_amount">
+                    <input type="hidden" name="tf_amount" :value="form.tf_amount">
                     <div>
                         <label class="block text-xs font-medium text-slate-700">Tanggal <span class="text-red-500">*</span></label>
                         <input type="date" name="harvested_at" value="{{ old('harvested_at', now()->format('Y-m-d')) }}" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
@@ -412,37 +515,63 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-700">Kg <span class="text-red-500">*</span></label>
-                        <input type="number" name="kg" id="input-kg" value="{{ old('kg') }}" step="0.01" min="0.01" class="mt-1 w-full rounded-md border-slate-300 text-sm" required
-                            oninput="document.getElementById('input-total').value = (parseFloat(this.value) || 0) * (parseFloat(document.getElementById('input-price').value) || 0)">
+                        <input type="number" name="kg" id="input-kg" x-ref="kg" value="{{ old('kg') }}" step="0.01" min="0.01" class="mt-1 w-full rounded-md border-slate-300 text-sm" required @input="syncAmounts()">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-700">Harga/Kg <span class="text-red-500">*</span></label>
-                        <input type="number" name="price_per_kg" id="input-price" value="{{ old('price_per_kg') }}" step="100" min="0" class="mt-1 w-full rounded-md border-slate-300 text-sm" required
-                            oninput="document.getElementById('input-total').value = (parseFloat(this.value) || 0) * (parseFloat(document.getElementById('input-kg').value) || 0)">
+                        <input type="number" name="price_per_kg" id="input-price" x-ref="price" value="{{ old('price_per_kg') }}" step="100" min="0" class="mt-1 w-full rounded-md border-slate-300 text-sm" required @input="syncAmounts()">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-700">Total <span class="text-xs text-slate-400">(otomatis)</span></label>
-                        <input type="text" id="input-total" readonly class="mt-1 w-full rounded-md border-slate-200 bg-slate-50 text-sm font-semibold text-slate-900" value="0">
+                        <input type="text" id="input-total" x-ref="total" readonly class="mt-1 w-full rounded-md border-slate-200 bg-slate-50 text-sm font-semibold text-slate-900" value="0">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-700">Payment Method</label>
+                        <select name="payment_method" x-model="form.payment_method" @change="syncAmounts()" class="mt-1 w-full rounded-md border-slate-300 text-sm">
+                            <option value="cash">Cash</option>
+                            <option value="tf">TF</option>
+                            <option value="split">Split</option>
+                        </select>
+                    </div>
+                    <div x-show="form.payment_method !== 'split'">
+                        <label class="block text-xs font-medium text-slate-700">Cash <span class="text-xs text-slate-400">(otomatis)</span></label>
+                        <input type="number" x-model="form.cash_amount" readonly class="mt-1 w-full rounded-md border-slate-200 bg-slate-50 text-sm">
+                    </div>
+                    <div x-show="form.payment_method !== 'split'">
+                        <label class="block text-xs font-medium text-slate-700">TF <span class="text-xs text-slate-400">(otomatis)</span></label>
+                        <input type="number" x-model="form.tf_amount" readonly class="mt-1 w-full rounded-md border-slate-200 bg-slate-50 text-sm">
+                    </div>
+                    <div x-show="form.payment_method === 'split'">
+                        <label class="block text-xs font-medium text-slate-700">Cash</label>
+                        <input type="number" x-model="form.cash_amount" min="0" :max="$refs.total?.value || 0" step="0.01" class="mt-1 w-full rounded-md border-slate-300 text-sm" @input="syncAmounts()">
+                    </div>
+                    <div x-show="form.payment_method === 'split'">
+                        <label class="block text-xs font-medium text-slate-700">TF</label>
+                        <input type="number" x-model="form.tf_amount" min="0" :max="$refs.total?.value || 0" step="0.01" class="mt-1 w-full rounded-md border-slate-300 text-sm" @input="syncAmounts()">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-700">Catatan</label>
                         <input type="text" name="notes" value="{{ old('notes') }}" class="mt-1 w-full rounded-md border-slate-300 text-sm">
                     </div>
                     <div class="sm:col-span-2 lg:col-span-6">
-                        <button class="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">Simpan Catatan Panen</button>
+                        <button type="submit" @click="ensureSubmitDefaults()" class="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">Simpan Catatan Panen</button>
                     </div>
                 </form>
             </div>
 
             {{-- History Table --}}
-            <div class="border-t border-slate-200 overflow-x-auto">
+            <div class="border-t border-slate-200">
+                {{-- Desktop Table --}}
+                <div class="hidden md:block max-h-72 overflow-y-auto overflow-x-auto">
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead class="bg-slate-50 text-left text-slate-500">
+                    <thead class="bg-slate-50 text-left text-slate-500 sticky top-0 z-10">
                         <tr>
                             <th class="whitespace-nowrap px-4 py-3">Tanggal</th>
                             <th class="whitespace-nowrap px-4 py-3">Bakul</th>
                             <th class="whitespace-nowrap px-4 py-3">Kg</th>
                             <th class="whitespace-nowrap px-4 py-3">Harga/Kg</th>
+                            <th class="whitespace-nowrap px-4 py-3">Cash</th>
+                            <th class="whitespace-nowrap px-4 py-3">TF</th>
                             <th class="whitespace-nowrap px-4 py-3">Total</th>
                             <th class="whitespace-nowrap px-4 py-3">Kolam</th>
                             <th class="whitespace-nowrap px-4 py-3">Catatan</th>
@@ -456,6 +585,8 @@
                                 <td class="whitespace-nowrap px-4 py-3" x-text="input.bucket_name"></td>
                                 <td class="whitespace-nowrap px-4 py-3" x-text="parseFloat(input.kg).toLocaleString('id-ID', {minimumFractionDigits: 2})"></td>
                                 <td class="whitespace-nowrap px-4 py-3" x-text="'Rp ' + parseFloat(input.price_per_kg).toLocaleString('id-ID')"></td>
+                                <td class="whitespace-nowrap px-4 py-3" x-text="parseFloat(input.cash_amount || 0) > 0 ? ('Rp ' + parseFloat(input.cash_amount).toLocaleString('id-ID', {minimumFractionDigits: 2})) : '-'"></td>
+                                <td class="whitespace-nowrap px-4 py-3" x-text="parseFloat(input.tf_amount || 0) > 0 ? ('Rp ' + parseFloat(input.tf_amount).toLocaleString('id-ID', {minimumFractionDigits: 2})) : '-'"></td>
                                 <td class="whitespace-nowrap px-4 py-3 font-semibold" x-text="'Rp ' + parseFloat(input.total_price).toLocaleString('id-ID', {minimumFractionDigits: 2})"></td>
                                 <td class="whitespace-nowrap px-4 py-3">
                                     {{ $pond->name }}
@@ -474,13 +605,78 @@
                                 </td>
                             </tr>
                         </template>
+                        {{-- Summary Row --}}
+                        <template x-if="inputs.length > 0">
+                            <tr class="bg-slate-50 font-semibold text-slate-800">
+                                <td colspan="2" class="px-4 py-3 text-right text-xs uppercase tracking-wider text-slate-500">Jumlah</td>
+                                <td class="whitespace-nowrap px-4 py-3" x-text="inputs.reduce((sum, i) => sum + parseFloat(i.kg || 0), 0).toLocaleString('id-ID', {minimumFractionDigits: 2})"></td>
+                                <td class="px-4 py-3"></td>
+                                <td class="whitespace-nowrap px-4 py-3" x-text="'Rp ' + inputs.reduce((sum, i) => sum + parseFloat(i.cash_amount || 0), 0).toLocaleString('id-ID', {minimumFractionDigits: 2})"></td>
+                                <td class="whitespace-nowrap px-4 py-3" x-text="'Rp ' + inputs.reduce((sum, i) => sum + parseFloat(i.tf_amount || 0), 0).toLocaleString('id-ID', {minimumFractionDigits: 2})"></td>
+                                <td class="whitespace-nowrap px-4 py-3" x-text="'Rp ' + inputs.reduce((sum, i) => sum + parseFloat(i.total_price || 0), 0).toLocaleString('id-ID', {minimumFractionDigits: 2})"></td>
+                                <td colspan="3" class="px-4 py-3"></td>
+                            </tr>
+                        </template>
                         <template x-if="inputs.length === 0">
                             <tr>
-                                <td colspan="8" class="px-4 py-12 text-center text-slate-500">Belum ada catatan panen.</td>
+                                <td colspan="10" class="px-4 py-12 text-center text-slate-500">Belum ada catatan panen.</td>
                             </tr>
                         </template>
                     </tbody>
                 </table>
+                </div>
+
+                {{-- Mobile Card View --}}
+                <div class="max-h-72 overflow-y-auto divide-y divide-slate-100 md:hidden">
+                    <template x-for="(input, idx) in inputs" :key="input.id">
+                        <div class="p-4 space-y-2 text-sm">
+                            <div class="flex justify-between items-start">
+                                <span class="font-bold text-slate-900" x-text="formatDate(input.harvested_at)"></span>
+                                <template x-if="input.status === 'draft'">
+                                    <div class="flex gap-2">
+                                        <button type="button" @click.prevent="startEdit(input)" class="text-xs font-semibold text-slate-700 underline hover:text-slate-900">Edit</button>
+                                        <form method="POST" :action="`/ponds/${input.pond_id}/inputs/${input.id}`" onsubmit="return confirm('Hapus catatan panen ini?')">
+                                            @csrf @method('DELETE')
+                                            <button class="text-xs font-semibold text-red-700 underline hover:text-red-900">Hapus</button>
+                                        </form>
+                                    </div>
+                                </template>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-slate-600">
+                                <div>
+                                    <div class="text-[10px] uppercase text-slate-400 font-semibold">Bakul</div>
+                                    <div class="font-medium" x-text="input.bucket_name"></div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] uppercase text-slate-400 font-semibold">Kg</div>
+                                    <div class="font-medium" x-text="parseFloat(input.kg).toLocaleString('id-ID', {minimumFractionDigits: 2})"></div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] uppercase text-slate-400 font-semibold">Harga</div>
+                                    <div class="font-medium" x-text="'Rp ' + parseFloat(input.price_per_kg).toLocaleString('id-ID')"></div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] uppercase text-slate-400 font-semibold">Total</div>
+                                    <div class="font-semibold" x-text="'Rp ' + parseFloat(input.total_price).toLocaleString('id-ID', {minimumFractionDigits: 2})"></div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] uppercase text-slate-400 font-semibold">Cash</div>
+                                    <div class="font-medium" x-text="parseFloat(input.cash_amount || 0) > 0 ? ('Rp ' + parseFloat(input.cash_amount).toLocaleString('id-ID', {minimumFractionDigits: 2})) : '-'"></div>
+                                </div>
+                                <div>
+                                    <div class="text-[10px] uppercase text-slate-400 font-semibold">TF</div>
+                                    <div class="font-medium" x-text="parseFloat(input.tf_amount || 0) > 0 ? ('Rp ' + parseFloat(input.tf_amount).toLocaleString('id-ID', {minimumFractionDigits: 2})) : '-'"></div>
+                                </div>
+                            </div>
+                            <div class="text-xs text-slate-500" x-show="input.notes">
+                                <span class="font-medium text-slate-700">Catatan:</span> <span x-text="input.notes"></span>
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="inputs.length === 0">
+                        <div class="py-12 text-center text-slate-500">Belum ada catatan panen.</div>
+                    </template>
+                </div>
             </div>
 
             {{-- Export Button --}}
@@ -513,11 +709,27 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-700">Kg</label>
-                                <input type="number" name="kg" x-model="editForm.kg" step="0.01" min="0.01" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                                <input type="number" name="kg" x-model="editForm.kg" step="0.01" min="0.01" class="mt-1 w-full rounded-md border-slate-300 text-sm" @input="syncEditAmounts()" required>
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-700">Harga/Kg</label>
-                                <input type="number" name="price_per_kg" x-model="editForm.price_per_kg" step="100" min="0" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                                <input type="number" name="price_per_kg" x-model="editForm.price_per_kg" step="100" min="0" class="mt-1 w-full rounded-md border-slate-300 text-sm" @input="syncEditAmounts()" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700">Payment Method</label>
+                                <select name="payment_method" x-model="editForm.payment_method" @change="syncEditAmounts()" class="mt-1 w-full rounded-md border-slate-300 text-sm">
+                                    <option value="cash" selected>Cash</option>
+                                    <option value="tf">TF</option>
+                                    <option value="split">Split</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700">Cash</label>
+                                <input type="number" name="cash_amount" x-model="editForm.cash_amount" :readonly="editForm.payment_method !== 'split'" :class="editForm.payment_method !== 'split' ? 'bg-slate-50 border-slate-200' : 'border-slate-300'" class="mt-1 w-full rounded-md text-sm" @input="syncEditAmounts()">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700">TF</label>
+                                <input type="number" name="tf_amount" x-model="editForm.tf_amount" :readonly="editForm.payment_method !== 'split'" :class="editForm.payment_method !== 'split' ? 'bg-slate-50 border-slate-200' : 'border-slate-300'" class="mt-1 w-full rounded-md text-sm" @input="syncEditAmounts()">
                             </div>
                         </div>
                         <div>
@@ -624,8 +836,9 @@
                 </div>
 
                 {{-- Desktop View --}}
-                <table class="hidden min-w-full divide-y divide-slate-200 text-sm md:table">
-                    <thead class="bg-slate-50 text-left text-slate-500">
+                <div class="hidden max-h-72 overflow-y-auto md:block">
+                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-slate-50 text-left text-slate-500 sticky top-0 z-10">
                         <tr>
                             <th class="whitespace-nowrap px-4 py-3">Tanggal</th>
                             <th class="whitespace-nowrap px-4 py-3">Jenis Ikan</th>
@@ -663,7 +876,7 @@
                                         <div x-show="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" @click.self="show = false" x-cloak>
                                             <div class="mx-4 w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
                                                 <div class="mb-4 flex items-center justify-between">
-                                                    <h3 class="font-semibold text-slate-900">Detail Catatan Panen – {{ $harvest->harvested_at->format('d/m/Y') }}</h3>
+                                                    <h3 class="font-semibold text-slate-900">Detail Catatan Panen &mdash; {{ $harvest->harvested_at->format('d/m/Y') }}</h3>
                                                     <button @click="show = false" class="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
                                                 </div>
                                                 <div class="overflow-x-auto">
@@ -691,13 +904,21 @@
                                                             @empty
                                                                 <tr><td colspan="6" class="px-3 py-6 text-center text-slate-500">Tidak ada catatan detail.</td></tr>
                                                             @endforelse
+                                                            @if($harvest->harvestInputs->count() > 0)
+                                                                <tr class="bg-slate-50 font-semibold text-slate-800">
+                                                                    <td colspan="2" class="px-3 py-2 text-right text-xs uppercase tracking-wider text-slate-500">Jumlah</td>
+                                                                    <td class="whitespace-nowrap px-3 py-2">{{ number_format($harvest->harvestInputs->sum('kg'), 2, ',', '.') }} kg</td>
+                                                                    <td class="px-3 py-2"></td>
+                                                                    <td class="whitespace-nowrap px-3 py-2">Rp {{ number_format($harvest->harvestInputs->sum('total_price'), 2, ',', '.') }}</td>
+                                                                    <td class="px-3 py-2"></td>
+                                                                </tr>
+                                                            @endif
                                                         </tbody>
                                                     </table>
                                                 </div>
                                                 <div class="mt-3 flex items-center justify-between gap-3 text-sm text-slate-600">
                                                     <div>
-                                                        <strong>Total:</strong> {{ number_format($harvest->harvestInputs->sum('kg'), 2, ',', '.') }} kg
-                                                        – Rp {{ number_format($harvest->harvestInputs->sum('total_price'), 2, ',', '.') }}
+                                                        <strong>Total:</strong> {{ number_format($harvest->harvestInputs->sum('kg'), 2, ',', '.') }} kg &mdash; Rp {{ number_format($harvest->harvestInputs->sum('total_price'), 2, ',', '.') }}
                                                     </div>
                                                     <a href="{{ route('ponds.harvests.export', [$pond, $harvest]) }}" class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm ring-1 ring-slate-300 hover:bg-slate-50">
                                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -717,9 +938,10 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
 
                 {{-- Mobile Card View --}}
-                <div id="harvestCardContainer" class="grid grid-cols-1 divide-y divide-slate-100 md:hidden">
+                <div id="harvestCardContainer" class="max-h-72 overflow-y-auto grid grid-cols-1 divide-y divide-slate-100 md:hidden">
                     @forelse ($harvests as $harvest)
                         @php
                             $searchText = Str::lower($harvest->harvested_at->format('d/m/Y').' '.$harvest->fish_type.' '.$harvest->notes);
@@ -764,7 +986,7 @@
                                     <div x-show="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" @click.self="show = false" x-cloak>
                                         <div class="mx-4 w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl">
                                             <div class="mb-4 flex items-center justify-between">
-                                                <h3 class="font-semibold text-slate-900">Detail Catatan Panen – {{ $harvest->harvested_at->format('d/m/Y') }}</h3>
+                                                <h3 class="font-semibold text-slate-900">Detail Catatan Panen &mdash; {{ $harvest->harvested_at->format('d/m/Y') }}</h3>
                                                 <button @click="show = false" class="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
                                             </div>
                                             <div class="overflow-x-auto">
@@ -792,13 +1014,21 @@
                                                         @empty
                                                             <tr><td colspan="6" class="px-3 py-6 text-center text-slate-500">Tidak ada catatan detail.</td></tr>
                                                         @endforelse
+                                                            @if($harvest->harvestInputs->count() > 0)
+                                                                <tr class="bg-slate-50 font-semibold text-slate-800">
+                                                                    <td colspan="2" class="px-3 py-2 text-right text-xs uppercase tracking-wider text-slate-500">Jumlah</td>
+                                                                    <td class="whitespace-nowrap px-3 py-2">{{ number_format($harvest->harvestInputs->sum('kg'), 2, ',', '.') }} kg</td>
+                                                                    <td class="px-3 py-2"></td>
+                                                                    <td class="whitespace-nowrap px-3 py-2">Rp {{ number_format($harvest->harvestInputs->sum('total_price'), 2, ',', '.') }}</td>
+                                                                    <td class="px-3 py-2"></td>
+                                                                </tr>
+                                                            @endif
                                                     </tbody>
                                                 </table>
                                             </div>
                                             <div class="mt-3 flex items-center justify-between gap-3 text-sm text-slate-600">
                                                 <div>
-                                                    <strong>Total:</strong> {{ number_format($harvest->harvestInputs->sum('kg'), 2, ',', '.') }} kg
-                                                    – Rp {{ number_format($harvest->harvestInputs->sum('total_price'), 2, ',', '.') }}
+                                                    <strong>Total:</strong> {{ number_format($harvest->harvestInputs->sum('kg'), 2, ',', '.') }} kg &mdash; Rp {{ number_format($harvest->harvestInputs->sum('total_price'), 2, ',', '.') }}
                                                 </div>
                                                 <a href="{{ route('ponds.harvests.export', [$pond, $harvest]) }}" class="inline-flex items-center gap-2 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm ring-1 ring-slate-300 hover:bg-slate-50">
                                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

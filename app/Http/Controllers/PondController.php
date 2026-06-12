@@ -63,7 +63,9 @@ class PondController extends Controller
         $pond->load(['feed.category', 'feedings.feed.category']);
 
         $harvests = $pond->harvests()
-            ->with('harvestInputs')
+            ->with(['harvestInputs' => function ($q) {
+                $q->orderByDesc('harvested_at');
+            }])
             ->orderByDesc('harvested_at')
             ->paginate(5, ['*'], 'harvests_page')
             ->withQueryString();
@@ -104,6 +106,9 @@ class PondController extends Controller
                     'kg' => (float) $i->kg,
                     'price_per_kg' => (float) $i->price_per_kg,
                     'total_price' => (float) $i->total_price,
+                    'payment_method' => $i->payment_method ?? 'cash',
+                    'cash_amount' => (float) ($i->cash_amount ?? 0),
+                    'tf_amount' => (float) ($i->tf_amount ?? 0),
                     'notes' => $i->notes,
                     'status' => $i->status,
                 ]),
