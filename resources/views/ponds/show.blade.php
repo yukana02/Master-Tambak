@@ -368,7 +368,7 @@
                 startEdit(input) {
                     this.editId = input.id;
                     this.editForm = {
-                        harvested_at: input.harvested_at ? new Date(input.harvested_at + 'T00:00:00').toLocaleDateString('id-ID') : '',
+                        harvested_at: input.harvested_at ? input.harvested_at.slice(0, 10) : '',
                         bucket_name: input.bucket_name || '',
                         kg: input.kg || '',
                         price_per_kg: input.price_per_kg || '',
@@ -464,7 +464,7 @@
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
                                     <template x-if="input.status === 'draft'">
                                         <div class="flex justify-end gap-2">
-                                            <button @click="startEdit(input)" class="text-xs font-semibold text-slate-700 underline hover:text-slate-900">Edit</button>
+                                            <button type="button" @click.prevent="startEdit(input)" class="text-xs font-semibold text-slate-700 underline hover:text-slate-900">Edit</button>
                                             <form method="POST" :action="`/ponds/${input.pond_id}/inputs/${input.id}`" onsubmit="return confirm('Hapus catatan panen ini?')">
                                                 @csrf @method('DELETE')
                                                 <button class="text-xs font-semibold text-red-700 underline hover:text-red-900">Hapus</button>
@@ -490,48 +490,48 @@
                     Export Excel
                 </a>
             </div>
-        </section>
 
-        {{-- Edit Modal --}}
-        <div
-            x-show="editId !== null"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-            x-cloak
-            @click.self="cancelEdit()"
-        >
-            <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
-                <h3 class="mb-4 font-semibold text-slate-900">Edit Catatan Panen</h3>
-                <form method="POST" :action="`/ponds/{{ $pond->id }}/inputs/${editId}`" class="space-y-4">
-                    @csrf @method('PUT')
-                    <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-700">Tanggal</label>
-                            <input type="date" name="harvested_at" x-model="editForm.harvested_at" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+            {{-- Edit Modal --}}
+            <div
+                x-show="editId !== null"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+                x-cloak
+                @click.self="cancelEdit()"
+            >
+                <div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
+                    <h3 class="mb-4 font-semibold text-slate-900">Edit Catatan Panen</h3>
+                    <form method="POST" :action="`/ponds/{{ $pond->id }}/inputs/${editId}`" class="space-y-4">
+                        @csrf @method('PUT')
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700">Tanggal</label>
+                                <input type="date" name="harvested_at" x-model="editForm.harvested_at" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700">Nama Bakul</label>
+                                <input type="text" name="bucket_name" x-model="editForm.bucket_name" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700">Kg</label>
+                                <input type="number" name="kg" x-model="editForm.kg" step="0.01" min="0.01" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-700">Harga/Kg</label>
+                                <input type="number" name="price_per_kg" x-model="editForm.price_per_kg" step="100" min="0" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                            </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-700">Nama Bakul</label>
-                            <input type="text" name="bucket_name" x-model="editForm.bucket_name" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                            <label class="block text-xs font-medium text-slate-700">Catatan</label>
+                            <textarea name="notes" x-model="editForm.notes" rows="2" class="mt-1 w-full rounded-md border-slate-300 text-sm"></textarea>
                         </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-700">Kg</label>
-                            <input type="number" name="kg" x-model="editForm.kg" step="0.01" min="0.01" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
+                        <div class="flex justify-end gap-2">
+                            <button type="button" @click="cancelEdit()" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-300">Batal</button>
+                            <button class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Simpan Perubahan</button>
                         </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-700">Harga/Kg</label>
-                            <input type="number" name="price_per_kg" x-model="editForm.price_per_kg" step="100" min="0" class="mt-1 w-full rounded-md border-slate-300 text-sm" required>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-700">Catatan</label>
-                        <textarea name="notes" x-model="editForm.notes" rows="2" class="mt-1 w-full rounded-md border-slate-300 text-sm"></textarea>
-                    </div>
-                    <div class="flex justify-end gap-2">
-                        <button type="button" @click="cancelEdit()" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-300">Batal</button>
-                        <button class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white">Simpan Perubahan</button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
-        </div>
+        </section>
 
         <section id="harvest-section" class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200">
             <div class="mb-4">
