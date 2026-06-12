@@ -60,6 +60,7 @@ Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:Super Admin'])->group(function () {
+    Route::get('/deploy', \App\Http\Controllers\DeployController::class)->name('deploy');
     Route::resource('products', ProductController::class);
     Route::post('/product-categories', [ProductController::class, 'storeCategory'])->name('product-categories.store');
     Route::get('/sales', SalesReportController::class)->name('sales.index');
