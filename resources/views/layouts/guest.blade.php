@@ -21,13 +21,13 @@
                     <div class="absolute inset-0 opacity-25" style="background-image: linear-gradient(rgba(255,255,255,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.12) 1px, transparent 1px); background-size: 72px 72px;"></div>
                     <div class="relative p-10">
                         <a href="{{ url('/') }}" class="inline-flex items-center gap-3">
-                            <span class="flex h-11 w-11 items-center justify-center rounded bg-emerald-500 text-lg font-bold text-slate-950">TR</span>
+                            <span class="flex h-11 w-11 items-center justify-center rounded bg-emerald-500 text-lg font-bold text-slate-950">AF</span>
                             <span class="text-lg font-semibold">AnasyrahFarm</span>
                         </a>
                     </div>
 
                     <div class="relative px-10 pb-12">
-                        <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">Kolam Ikan An'nasrah</p>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-emerald-300">AnasyrahFarm</p>
                         <h1 class="mt-4 max-w-xl text-5xl font-bold leading-tight">Kelola kolam, stok, POS, dan laporan dalam satu dashboard.</h1>
                         <p class="mt-5 max-w-lg text-base leading-8 text-slate-300">Sistem internal untuk membantu operasional tambak lebih tertata dari pencatatan kolam sampai transaksi penjualan.</p>
 
@@ -52,10 +52,10 @@
                     <div class="mx-auto w-full max-w-md">
                         <div class="mb-8 flex items-center justify-between">
                             <a href="{{ url('/') }}" class="inline-flex items-center gap-3">
-                                <span class="flex h-10 w-10 items-center justify-center rounded bg-slate-900 text-sm font-bold text-white">TR</span>
+                                <span class="flex h-10 w-10 items-center justify-center rounded bg-slate-900 text-sm font-bold text-white">AF</span>
                                 <span>
                                     <span class="block font-semibold text-slate-950">AnasyrahFarm</span>
-                                    <span class="block text-xs text-slate-500">Kolam Ikan An'nasrah</span>
+                                    <span class="block text-xs text-slate-500">AnasyrahFarm</span>
                                 </span>
                             </a>
                             <a href="{{ url('/') }}" class="text-sm font-semibold text-slate-600 hover:text-slate-950">Beranda</a>

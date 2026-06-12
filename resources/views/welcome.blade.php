@@ -72,7 +72,7 @@
                             AnasyrahFarm dikelola sebagai area budidaya ikan dengan kebutuhan operasional yang lengkap: pendataan kolam, jadwal tebar dan panen, stok produk, transaksi POS, serta laporan keuangan.
                         </p>
                         <p>
-                            Website ini juga terhubung dengan sistem internal Tambak Rasyid untuk membantu pengelola melihat kondisi kolam, mencatat pemasukan-pengeluaran, dan memproses penjualan secara lebih rapi.
+                            Website ini juga terhubung dengan sistem internal AnasyrahFarm untuk membantu pengelola melihat kondisi kolam, mencatat pemasukan-pengeluaran, dan memproses penjualan secara lebih rapi.
                         </p>
                     </div>
                 </div>
@@ -142,7 +142,7 @@
         <footer class="border-t border-slate-200 bg-slate-950 text-white">
             <div class="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-6 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
                 <p class="font-semibold">AnasyrahFarm</p>
-                <p class="text-slate-300">Company profile dan sistem operasional Tambak Rasyid.</p>
+                <p class="text-slate-300">Company profile dan sistem operasional AnasyrahFarm.</p>
             </div>
         </footer>
     </body>
