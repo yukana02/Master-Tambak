@@ -92,7 +92,21 @@ class PondController extends Controller
             'allPonds' => $allPonds,
             'feeds' => Feed::with('category')->where('is_active', true)->orderBy('name')->get(),
             'feedCategories' => FeedCategory::orderBy('name')->get(),
-            'inputs' => $pond->harvestInputs()->orderByDesc('harvested_at')->get(),
+            'inputs' => $pond->harvestInputs()
+                ->where('status', 'draft')
+                ->orderByDesc('harvested_at')
+                ->get()
+                ->map(fn ($i) => [
+                    'id' => $i->id,
+                    'pond_id' => $i->pond_id,
+                    'harvested_at' => $i->harvested_at?->format('Y-m-d'),
+                    'bucket_name' => $i->bucket_name,
+                    'kg' => (float) $i->kg,
+                    'price_per_kg' => (float) $i->price_per_kg,
+                    'total_price' => (float) $i->total_price,
+                    'notes' => $i->notes,
+                    'status' => $i->status,
+                ]),
         ]);
     }
 

@@ -350,6 +350,11 @@
                 inputs: @js($inputs->toArray()),
                 editId: null,
                 editForm: { harvested_at: '', bucket_name: '', kg: '', price_per_kg: '', notes: '' },
+                formatDate(d) {
+                    if (!d) return '';
+                    const parts = d.split('-');
+                    return parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : d;
+                },
                 get summary() {
                     const totalKg = this.inputs.reduce((s, i) => s + parseFloat(i.kg || 0), 0);
                     const totalUang = this.inputs.reduce((s, i) => s + parseFloat(i.total_price || 0), 0);
@@ -439,7 +444,7 @@
                             <th class="whitespace-nowrap px-4 py-3">Kg</th>
                             <th class="whitespace-nowrap px-4 py-3">Harga/Kg</th>
                             <th class="whitespace-nowrap px-4 py-3">Total</th>
-                            <th class="whitespace-nowrap px-4 py-3">Status</th>
+                            <th class="whitespace-nowrap px-4 py-3">Kolam</th>
                             <th class="whitespace-nowrap px-4 py-3">Catatan</th>
                             <th class="whitespace-nowrap px-4 py-3"></th>
                         </tr>
@@ -447,14 +452,13 @@
                     <tbody class="divide-y divide-slate-100">
                         <template x-for="(input, idx) in inputs" :key="input.id">
                             <tr>
-                                <td class="whitespace-nowrap px-4 py-3" x-text="input.harvested_at"></td>
+                                <td class="whitespace-nowrap px-4 py-3" x-text="formatDate(input.harvested_at)"></td>
                                 <td class="whitespace-nowrap px-4 py-3" x-text="input.bucket_name"></td>
                                 <td class="whitespace-nowrap px-4 py-3" x-text="parseFloat(input.kg).toLocaleString('id-ID', {minimumFractionDigits: 2})"></td>
                                 <td class="whitespace-nowrap px-4 py-3" x-text="'Rp ' + parseFloat(input.price_per_kg).toLocaleString('id-ID')"></td>
                                 <td class="whitespace-nowrap px-4 py-3 font-semibold" x-text="'Rp ' + parseFloat(input.total_price).toLocaleString('id-ID', {minimumFractionDigits: 2})"></td>
                                 <td class="whitespace-nowrap px-4 py-3">
-                                    <span x-show="input.status === 'draft'" class="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">Draft</span>
-                                    <span x-show="input.status === 'final'" class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">Final</span>
+                                    {{ $pond->name }}
                                 </td>
                                 <td class="min-w-32 px-4 py-3" x-text="input.notes || '-'"></td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
