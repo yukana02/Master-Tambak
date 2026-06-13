@@ -33,9 +33,9 @@ class PondFeedingController extends Controller
         return back()->with('success', 'Catatan pakan berhasil disimpan.');
     }
 
-    public function destroy(Pond $pond, PondFeeding $feeding): RedirectResponse
+    public function destroy(PondFeeding $feeding): RedirectResponse
     {
-        abort_unless($feeding->pond_id === $pond->id, 404);
+        $pond = $feeding->pond;
 
         $feeding->delete();
 

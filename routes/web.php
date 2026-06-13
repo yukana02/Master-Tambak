@@ -43,7 +43,7 @@ Route::middleware(['auth', 'role:Super Admin'])->group(function () {
 
     Route::resource('ponds', PondController::class);
     Route::post('/ponds/{pond}/feedings', [PondFeedingController::class, 'store'])->name('ponds.feedings.store');
-    Route::post('/ponds/{pond}/feedings/{feeding}/delete', [PondFeedingController::class, 'destroy'])->name('ponds.feedings.destroy');
+    Route::any('/feedings/{feeding}/delete', [PondFeedingController::class, 'destroy'])->name('ponds.feedings.destroy');
     Route::post('/ponds/{pond}/harvests', [PondHarvestController::class, 'store'])->name('ponds.harvests.store');
     Route::get('/ponds/{pond}/harvests/{harvest}/export', [PondHarvestController::class, 'export'])->name('ponds.harvests.export');
     Route::post('/ponds/{pond}/inputs', [PondHarvestInputController::class, 'store'])->name('ponds.inputs.store');
