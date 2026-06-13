@@ -34,7 +34,7 @@ Route::middleware(['auth', 'role:Super Admin'])->group(function () {
     Route::put('/roles/{role}/permissions', [RolePermissionController::class, 'syncPermissions'])->name('roles.permissions');
 });
 
-Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
+    Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
     Route::get('/feed-categories', [FeedController::class, 'categoriesIndex'])->name('feed-categories.index');
     Route::post('/feed-categories', [FeedController::class, 'storeCategory'])->name('feed-categories.store');
     Route::put('/feed-categories/{category}', [FeedController::class, 'updateCategory'])->name('feed-categories.update');
@@ -43,7 +43,7 @@ Route::middleware(['auth', 'role:Super Admin|Admin'])->group(function () {
 
     Route::resource('ponds', PondController::class);
     Route::post('/ponds/{pond}/feedings', [PondFeedingController::class, 'store'])->name('ponds.feedings.store');
-    Route::delete('/ponds/{pond}/feedings/{feeding}', [PondFeedingController::class, 'destroy'])->name('ponds.feedings.destroy');
+    Route::post('/ponds/{pond}/feedings/{feeding}/delete', [PondFeedingController::class, 'destroy'])->name('ponds.feedings.destroy');
     Route::post('/ponds/{pond}/harvests', [PondHarvestController::class, 'store'])->name('ponds.harvests.store');
     Route::get('/ponds/{pond}/harvests/{harvest}/export', [PondHarvestController::class, 'export'])->name('ponds.harvests.export');
     Route::post('/ponds/{pond}/inputs', [PondHarvestInputController::class, 'store'])->name('ponds.inputs.store');

@@ -276,7 +276,7 @@
                                     <td class="min-w-48 px-4 py-3">{{ $feeding->notes ?: '-' }}</td>
                                     <td class="whitespace-nowrap px-4 py-3 text-right">
                                         <form method="POST" action="{{ route('ponds.feedings.destroy', ['pond' => $pond->id, 'feeding' => $feeding->id]) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan pemberian pakan ini?');">
-                                            @csrf @method('DELETE')
+                                            @csrf
                                             <button class="font-semibold text-red-700 underline">Hapus</button>
                                         </form>
                                     </td>
@@ -294,7 +294,7 @@
                                 <div class="flex justify-between items-start">
                                     <div class="font-bold text-slate-900">{{ $feeding->fed_at->format('d/m/Y') }}</div>
                                     <form method="POST" action="{{ route('ponds.feedings.destroy', ['pond' => $pond->id, 'feeding' => $feeding->id]) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan pemberian pakan ini?');">
-                                        @csrf @method('DELETE')
+                                        @csrf
                                         <button class="text-xs font-semibold text-red-700 underline hover:text-red-900">Hapus</button>
                                     </form>
                                 </div>
