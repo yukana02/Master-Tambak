@@ -953,6 +953,12 @@ Transfer : ${tf}
                                     </div>
                                 </div>
                             @endif
+                            <div class="mt-1 flex flex-wrap items-center justify-end gap-1">
+                                <form action="{{ route('ponds.harvests.destroy', [$pond, $harvest]) }}" method="POST" onsubmit="return confirm('Hapus riwayat panen {{ $harvest->harvested_at->format('d/m/Y') }} beserta seluruh data input panennya? Data tidak bisa dikembalikan.')">
+                                    @csrf
+                                    <button type="submit" class="rounded px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50">Hapus</button>
+                                </form>
+                            </div>
                         </td>
 
                             </tr>
@@ -1062,6 +1068,12 @@ Transfer : ${tf}
                                     </div>
                                 </div>
                             @endif
+                            <div class="pt-2">
+                                <form action="{{ route('ponds.harvests.destroy', [$pond, $harvest]) }}" method="POST" onsubmit="return confirm('Hapus riwayat panen {{ $harvest->harvested_at->format('d/m/Y') }} beserta seluruh data input panennya? Data tidak bisa dikembalikan.')">
+                                    @csrf
+                                    <button type="submit" class="w-full rounded-md border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50">Hapus Riwayat</button>
+                                </form>
+                            </div>
                         </div>
                     @empty
                         <div class="py-12 text-center text-slate-500">Belum ada riwayat panen.</div>

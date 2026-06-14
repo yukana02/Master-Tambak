@@ -53,6 +53,16 @@ class PondHarvestController extends Controller
         return redirect()->route('ponds.show', $pond)->with('success', 'Panen berhasil dikonfirmasi. Catatan pakan aktif sudah direset.');
     }
 
+    public function destroy(Pond $pond, PondHarvest $harvest): RedirectResponse
+    {
+        abort_unless($harvest->pond_id === $pond->id, 404);
+
+        $harvest->delete(); // cascade otomatis ke harvestInputs via foreign key
+
+        return redirect()->route('ponds.show', $pond)
+            ->with('success', 'Riwayat panen beserta data input panennya berhasil dihapus.');
+    }
+
     public function export(Pond $pond, PondHarvest $harvest): BinaryFileResponse
     {
         abort_unless($harvest->pond_id === $pond->id, 404);
