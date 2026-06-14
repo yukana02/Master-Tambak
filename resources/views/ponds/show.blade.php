@@ -479,6 +479,27 @@
                 cancelEdit() {
                     this.editId = null;
                     this.editForm = { harvested_at: '', bucket_name: '', kg: '', price_per_kg: '', payment_method: 'cash', cash_amount: '', tf_amount: '', notes: '' };
+                },
+                waMessage(input) {
+                    const d = input.harvested_at ? this.formatDate(input.harvested_at) : '-';
+                    const kg = parseFloat(input.kg || 0).toLocaleString('id-ID', {minimumFractionDigits: 2});
+                    const harga = 'Rp ' + parseFloat(input.price_per_kg || 0).toLocaleString('id-ID');
+                    const cash = parseFloat(input.cash_amount || 0) > 0 ? 'Rp ' + parseFloat(input.cash_amount).toLocaleString('id-ID', {minimumFractionDigits: 2}) : '-';
+                    const tf = parseFloat(input.tf_amount || 0) > 0 ? 'Rp ' + parseFloat(input.tf_amount).toLocaleString('id-ID', {minimumFractionDigits: 2}) : '-';
+                    const total = 'Rp ' + parseFloat(input.total_price || 0).toLocaleString('id-ID', {minimumFractionDigits: 2});
+                    return `*LAPORAN PANEN*
+═══════════════
+Tanggal : ${d}
+Bakul    : ${input.bucket_name}
+Berat    : ${kg} Kg
+Harga    : ${harga}/Kg
+Cash     : ${cash}
+Transfer : ${tf}
+*Total    : ${total}*`;
+                },
+                sendWA(input) {
+                    const text = encodeURIComponent(this.waMessage(input));
+                    window.open(`https://wa.me/?text=${text}`, '_blank');
                 }
             }"
             class="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200"
@@ -596,6 +617,7 @@
                                     <template x-if="input.status === 'draft'">
                                         <div class="flex justify-end gap-2">
                                             <button type="button" @click.prevent="startEdit(input)" class="text-xs font-semibold text-slate-700 underline hover:text-slate-900">Edit</button>
+                                            <button type="button" @click.prevent="sendWA(input)" class="text-xs font-semibold text-emerald-700 underline hover:text-emerald-900">Kirim WA</button>
                                             <form method="POST" :action="`/ponds/${input.pond_id}/inputs/${input.id}`" onsubmit="return confirm('Hapus catatan panen ini?')">
                                                 @csrf @method('DELETE')
                                                 <button class="text-xs font-semibold text-red-700 underline hover:text-red-900">Hapus</button>
@@ -633,8 +655,9 @@
                             <div class="flex justify-between items-start">
                                 <span class="font-bold text-slate-900" x-text="formatDate(input.harvested_at)"></span>
                                 <template x-if="input.status === 'draft'">
-                                    <div class="flex gap-2">
+                                    <div class="flex gap-2 flex-wrap">
                                         <button type="button" @click.prevent="startEdit(input)" class="text-xs font-semibold text-slate-700 underline hover:text-slate-900">Edit</button>
+                                        <button type="button" @click.prevent="sendWA(input)" class="text-xs font-semibold text-emerald-700 underline hover:text-emerald-900">Kirim WA</button>
                                         <form method="POST" :action="`/ponds/${input.pond_id}/inputs/${input.id}`" onsubmit="return confirm('Hapus catatan panen ini?')">
                                             @csrf @method('DELETE')
                                             <button class="text-xs font-semibold text-red-700 underline hover:text-red-900">Hapus</button>
