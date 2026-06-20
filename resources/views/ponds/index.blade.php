@@ -41,30 +41,34 @@
         }
 
         .pond-box-title {
-            font-size: calc(13px * var(--pond-font-scale, 1)) !important;
-            line-height: 1.15 !important;
+            font-size: calc(14px * var(--pond-font-scale, 1)) !important;
+            line-height: 1.2 !important;
         }
         .pond-box-badge {
-            font-size: calc(9px * var(--pond-font-scale, 1)) !important;
-            padding: calc(2px * var(--pond-pad-scale, 1)) calc(4px * var(--pond-pad-scale, 1)) !important;
-            border-radius: calc(4px * var(--pond-pad-scale, 1)) !important;
+            font-size: calc(10px * var(--pond-font-scale, 1)) !important;
+            padding: calc(3px * var(--pond-pad-scale, 1)) calc(6px * var(--pond-pad-scale, 1)) !important;
+            border-radius: calc(5px * var(--pond-pad-scale, 1)) !important;
             line-height: 1 !important;
         }
         .pond-box-body {
-            margin-top: calc(8px * var(--pond-pad-scale, 1)) !important;
+            margin-top: calc(10px * var(--pond-pad-scale, 1)) !important;
         }
         .pond-box-text {
-            font-size: calc(11px * var(--pond-font-scale, 1)) !important;
-            line-height: 1.25 !important;
+            font-size: calc(12px * var(--pond-font-scale, 1)) !important;
+            line-height: 1.35 !important;
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
+            word-break: break-word !important;
         }
         .pond-box-footer {
-            margin-top: calc(12px * var(--pond-pad-scale, 1)) !important;
+            margin-top: calc(14px * var(--pond-pad-scale, 1)) !important;
             gap: calc(6px * var(--pond-pad-scale, 1)) !important;
         }
         .pond-box-btn {
-            font-size: calc(10px * var(--pond-font-scale, 1)) !important;
-            padding: calc(3px * var(--pond-pad-scale, 1)) calc(6px * var(--pond-pad-scale, 1)) !important;
-            border-radius: calc(4px * var(--pond-pad-scale, 1)) !important;
+            font-size: calc(11px * var(--pond-font-scale, 1)) !important;
+            padding: calc(4px * var(--pond-pad-scale, 1)) calc(8px * var(--pond-pad-scale, 1)) !important;
+            border-radius: calc(5px * var(--pond-pad-scale, 1)) !important;
             line-height: 1.2 !important;
         }
 
@@ -124,23 +128,27 @@
                             @endphp
                             <div class="grid-stack-item" gs-id="{{ $pond->id }}" gs-x="{{ $pond->x }}" gs-y="{{ $pond->y }}" gs-w="{{ $pond->width }}" gs-h="{{ $pond->height }}">
                                 <div class="grid-stack-item-content rounded border-2 p-3 shadow-sm {{ $statusClass }}">
-                                    <div class="flex items-start justify-between gap-1">
-                                        <h2 class="font-semibold pond-box-title truncate" title="{{ $pond->name }}">{{ $pond->name }}</h2>
-                                        <span class="rounded bg-white/70 font-semibold pond-box-badge shrink-0 whitespace-nowrap">{{ $statusLabel }}</span>
+                                    <div class="flex items-start justify-between gap-2">
+                                        <h2 class="min-w-0 flex-1 whitespace-normal break-words font-semibold pond-box-title" title="{{ $pond->name }}">{{ $pond->name }}</h2>
+                                        <span class="shrink-0 rounded bg-transparent font-semibold pond-box-badge whitespace-nowrap">{{ $statusLabel }}</span>
                                     </div>
-                                    <div class="mt-2 space-y-0.5 pond-box-body">
-                                        <p class="pond-box-text text-slate-700 truncate" title="Panen: {{ $pond->predicted_harvest_date?->format('d M Y') ?? 'belum cukup data' }}">
-                                            <span class="text-slate-500 font-medium">Panen:</span> 
-                                            {{ $pond->predicted_harvest_date?->format('d M Y') ?? 'belum cukup data' }}
-                                        </p>
-                                        <p class="pond-box-text text-slate-700 truncate">
-                                            <span class="text-slate-500 font-medium">Progress:</span> 
-                                            {{ $pond->harvest_progress_percent ? number_format($pond->harvest_progress_percent, 1, ',', '.') . '%' : '-' }}
-                                        </p>
+                                    <div class="mt-2 space-y-1.5 pond-box-body">
+                                        <div class="px-0 py-0">
+                                            <p class="pond-box-text text-inherit">
+                                                <span class="font-medium text-inherit">Prediksi panen:</span>
+                                                <span>{{ $pond->predicted_harvest_date?->format('d M Y') ?? '-' }}</span>
+                                            </p>
+                                        </div>
+                                        <div class="px-0 py-0">
+                                            <p class="pond-box-text text-inherit">
+                                                <span class="font-medium text-inherit">Progress:</span>
+                                                <span>{{ $pond->harvest_progress_percent ? number_format($pond->harvest_progress_percent, 1, ',', '.') . '%' : '-' }}</span>
+                                            </p>
+                                        </div>
                                     </div>
                                     <div class="mt-3 flex flex-wrap gap-1.5 pond-box-footer">
-                                        <a href="{{ route('ponds.show', $pond) }}#feedings-section" class="inline-flex items-center justify-center rounded bg-white font-bold shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 pond-box-btn">Input Pakan</a>
-                                        <a href="{{ route('ponds.edit', $pond) }}" class="inline-flex items-center justify-center rounded bg-white font-bold shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 pond-box-btn">Edit</a>
+                                        <a href="{{ route('ponds.show', $pond) }}#feedings-section" class="inline-flex items-center justify-center rounded bg-transparent font-bold shadow-sm ring-1 ring-inset ring-current hover:bg-black/5 pond-box-btn">Input Pakan</a>
+                                        <a href="{{ route('ponds.edit', $pond) }}" class="inline-flex items-center justify-center rounded bg-transparent font-bold shadow-sm ring-1 ring-inset ring-current hover:bg-black/5 pond-box-btn">Edit</a>
                                     </div>
                                 </div>
                             </div>
@@ -425,8 +433,8 @@
 
             // Responsive Map
             const initResponsiveZoom = () => {
-                if (window.innerWidth < 640) applyZoom(0.42);
-                else if (window.innerWidth < 1024) applyZoom(0.65);
+                if (window.innerWidth < 640) applyZoom(0.48);
+                else if (window.innerWidth < 1024) applyZoom(0.72);
                 else applyZoom(1);
             };
             initResponsiveZoom();

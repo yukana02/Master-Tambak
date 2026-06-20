@@ -38,7 +38,7 @@
             ->sortKeys();
     @endphp
     <div class="space-y-6">
-        <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <div class="rounded-lg p-6">
             <dl class="grid gap-4 md:grid-cols-2">
                 <div><dt class="text-sm text-slate-500">Jenis Ikan</dt><dd class="font-semibold">{{ $pond->fish_type }}</dd></div>
                 <div><dt class="text-sm text-slate-500">Jumlah Ikan</dt><dd class="font-semibold">{{ number_format($pond->fish_count) }} ekor</dd></div>
@@ -46,13 +46,16 @@
                 <div><dt class="text-sm text-slate-500">Ikan Mati</dt><dd class="font-semibold">{{ number_format($pond->dead_fish_count) }} ekor</dd></div>
                 <div><dt class="text-sm text-slate-500">Estimasi Hidup</dt><dd class="font-semibold">{{ number_format($pond->estimated_live_fish_count) }} ekor</dd></div>
                 <div><dt class="text-sm text-slate-500">Tanggal Tebar</dt><dd class="font-semibold">{{ $pond->stocking_date?->format('d/m/Y') ?? '-' }}</dd></div>
-                <div><dt class="text-sm text-slate-500">Prediksi Tanggal Panen</dt><dd class="font-semibold">{{ $pond->predicted_harvest_date?->format('d/m/Y') ?? 'Belum cukup data' }}</dd></div>
+                <div class="px-0 py-0">
+                    <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Prediksi panen</dt>
+                    <dd class="mt-1 text-sm font-semibold text-slate-900 md:text-base">{{ $pond->predicted_harvest_date?->format('d/m/Y') ?? '-' }}</dd>
+                </div>
                 <div class="md:col-span-2"><dt class="text-sm text-slate-500">Catatan Ukuran Kolam</dt><dd class="font-semibold">{{ $pond->pond_size_notes ?: 'Tidak ada catatan ukuran.' }}</dd></div>
                 <div class="md:col-span-2"><dt class="text-sm text-slate-500">Catatan</dt><dd class="font-semibold">{{ $pond->notes ?: 'Tidak ada catatan.' }}</dd></div>
             </dl>
         </div>
 
-        <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200">
+        <div class="rounded-lg p-6 bg-transparent shadow-none ring-0">
             <div class="mb-4">
                 <h2 class="font-semibold text-slate-900">Rangkuman Pakan</h2>
             </div>
@@ -61,7 +64,7 @@
                 <div><dt class="text-sm text-slate-500">Total Pakan Aktual</dt><dd class="font-semibold">{{ $pond->actual_feed_weight_kg > 0 ? number_format($pond->actual_feed_weight_kg, 2, ',', '.') . ' kg' : '-' }}</dd></div>
                 <div><dt class="text-sm text-slate-500">Total Konversi Aktual</dt><dd class="font-semibold">{{ $pond->actual_estimated_meat_kg > 0 ? number_format($pond->actual_estimated_meat_kg, 2, ',', '.') . ' kg' : '-' }}</dd></div>
                 <div><dt class="text-sm text-slate-500">Rata-rata Harian</dt><dd class="font-semibold">{{ $pond->daily_estimated_meat_kg ? number_format($pond->daily_estimated_meat_kg, 2, ',', '.') . ' kg/hari' : '-' }}</dd></div>
-                <div><dt class="text-sm text-slate-500">Progress Target</dt><dd class="font-semibold">{{ $pond->harvest_progress_percent ? number_format($pond->harvest_progress_percent, 1, ',', '.') . '%' : '-' }}</dd></div>
+                <div><dt class="text-sm text-slate-500">Progress Target</dt><dd class="font-semibold text-slate-900">{{ $pond->harvest_progress_percent ? number_format($pond->harvest_progress_percent, 1, ',', '.') . '%' : '-' }}</dd></div>
             </dl>
         </div>
 
