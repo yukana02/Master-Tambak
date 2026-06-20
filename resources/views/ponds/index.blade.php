@@ -128,9 +128,11 @@
                             @endphp
                             <div class="grid-stack-item" gs-id="{{ $pond->id }}" gs-x="{{ $pond->x }}" gs-y="{{ $pond->y }}" gs-w="{{ $pond->width }}" gs-h="{{ $pond->height }}">
                                 <div class="grid-stack-item-content rounded border-2 p-3 shadow-sm {{ $statusClass }}">
-                                    <div class="flex items-start justify-between gap-2">
-                                        <h2 class="min-w-0 flex-1 whitespace-normal break-words font-semibold pond-box-title" title="{{ $pond->name }}">{{ $pond->name }}</h2>
-                                        <span class="shrink-0 rounded bg-transparent font-semibold pond-box-badge whitespace-nowrap">{{ $statusLabel }}</span>
+                                    <div class="space-y-1">
+                                        <h2 class="min-w-0 whitespace-normal break-words font-semibold pond-box-title" title="{{ $pond->name }}">{{ $pond->name }}</h2>
+                                        <div>
+                                            <span class="inline-flex rounded bg-transparent font-semibold pond-box-badge whitespace-nowrap">{{ $statusLabel }}</span>
+                                        </div>
                                     </div>
                                     <div class="mt-2 space-y-1.5 pond-box-body">
                                         <div class="px-0 py-0">
