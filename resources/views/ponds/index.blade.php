@@ -4,6 +4,88 @@
         <p class="text-sm text-slate-500">Atur peta kolam dengan drag, resize, pan, zoom, lalu simpan layout.</p>
     </x-slot>
 
+    <style>
+        /* Cegah font boosting di iOS/Android pada area peta */
+        #pondMapViewport,
+        #pondMapViewport *,
+        #pondMapCanvas,
+        #pondMapCanvas *,
+        .grid-stack-item,
+        .grid-stack-item * {
+            -webkit-text-size-adjust: none !important;
+            text-size-adjust: none !important;
+        }
+
+        #pondMapViewport {
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x pan-y;
+        }
+
+        #pondMapCanvas {
+            transform-origin: 0 0;
+            will-change: transform;
+            --pond-zoom: 1;
+            --pond-font-scale: 1;
+            --pond-pad-scale: 1;
+        }
+
+        .grid-stack-item-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            word-break: break-word;
+            padding: calc(12px * var(--pond-pad-scale, 1)) !important;
+            border-width: calc(2px * var(--pond-pad-scale, 1)) !important;
+            border-radius: calc(8px * var(--pond-pad-scale, 1)) !important;
+        }
+
+        .pond-box-title {
+            font-size: calc(13px * var(--pond-font-scale, 1)) !important;
+            line-height: 1.15 !important;
+        }
+        .pond-box-badge {
+            font-size: calc(9px * var(--pond-font-scale, 1)) !important;
+            padding: calc(2px * var(--pond-pad-scale, 1)) calc(4px * var(--pond-pad-scale, 1)) !important;
+            border-radius: calc(4px * var(--pond-pad-scale, 1)) !important;
+            line-height: 1 !important;
+        }
+        .pond-box-body {
+            margin-top: calc(8px * var(--pond-pad-scale, 1)) !important;
+        }
+        .pond-box-text {
+            font-size: calc(11px * var(--pond-font-scale, 1)) !important;
+            line-height: 1.25 !important;
+        }
+        .pond-box-footer {
+            margin-top: calc(12px * var(--pond-pad-scale, 1)) !important;
+            gap: calc(6px * var(--pond-pad-scale, 1)) !important;
+        }
+        .pond-box-btn {
+            font-size: calc(10px * var(--pond-font-scale, 1)) !important;
+            padding: calc(3px * var(--pond-pad-scale, 1)) calc(6px * var(--pond-pad-scale, 1)) !important;
+            border-radius: calc(4px * var(--pond-pad-scale, 1)) !important;
+            line-height: 1.2 !important;
+        }
+
+        @media (max-width: 639px) {
+            #pondMapViewport {
+                height: 56vh;
+                min-height: 320px;
+            }
+            #pondMapCanvas {
+                padding: 0.75rem !important;
+            }
+            .grid-stack-item-content {
+                padding: 0.5rem !important;
+            }
+            .pond-box-title { font-size: 11px !important; }
+            .pond-box-text { font-size: 9px !important; }
+            .pond-box-badge { font-size: 8px !important; }
+            .pond-box-btn { font-size: 8px !important; padding: 2px 5px !important; }
+        }
+    </style>
+
     <form id="layoutForm" class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-slate-200 sm:p-4">
         @csrf
         @if ($ponds->isEmpty())
@@ -29,8 +111,9 @@
                 </div>
             </div>
 
-            <div id="pondMapViewport" class="h-[62vh] min-h-[380px] overflow-auto rounded-lg border border-slate-200 bg-slate-100 md:h-[68vh] lg:h-[620px]">
-                <div id="pondMapCanvas" class="min-h-[760px] min-w-[1280px] origin-top-left p-4 sm:min-h-[900px] sm:min-w-[1680px] sm:p-6 lg:min-h-[1080px] lg:min-w-[2200px] lg:p-8" style="background-color: #eef6f0; background-image: linear-gradient(rgba(15, 23, 42, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 23, 42, .08) 1px, transparent 1px); background-size: 90px 90px;">
+            <div id="pondMapViewport" class="h-[62vh] min-h-[380px] overflow-auto rounded-lg border border-slate-200 bg-slate-100 md:h-[68vh] lg:h-[620px] relative">
+                <div id="canvasScaleWrapper" class="origin-top-left" style="width: 100%; height: 100%; transition: width 0.1s ease, height 0.1s ease;">
+                    <div id="pondMapCanvas" class="min-h-[760px] min-w-[1280px] origin-top-left p-4 sm:min-h-[900px] sm:min-w-[1680px] sm:p-6 lg:min-h-[1080px] lg:min-w-[2200px] lg:p-8" style="background-color: #eef6f0; background-image: linear-gradient(rgba(15, 23, 42, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(15, 23, 42, .08) 1px, transparent 1px); background-size: 90px 90px; transform: scale(1); transform-origin: 0 0; transition: transform 0.1s ease; -webkit-text-size-adjust: 100%; text-size-adjust: 100%;">
 
 
                     <div class="grid-stack w-[1200px] sm:w-[1560px] lg:w-[2040px]">
@@ -40,16 +123,24 @@
                                 $statusLabel = ['active' => 'Aktif', 'ready' => 'Target tercapai', 'soon' => 'Mendekati panen', 'overdue' => 'Terlambat panen'][$pond->status];
                             @endphp
                             <div class="grid-stack-item" gs-id="{{ $pond->id }}" gs-x="{{ $pond->x }}" gs-y="{{ $pond->y }}" gs-w="{{ $pond->width }}" gs-h="{{ $pond->height }}">
-                                <div class="grid-stack-item-content rounded border-2 p-4 shadow-sm {{ $statusClass }}">
-                                    <div class="flex items-start justify-between gap-2">
-                                        <h2 class="font-semibold">{{ $pond->name }}</h2>
-                                        <span class="rounded bg-white/70 px-2 py-1 text-xs font-semibold">{{ $statusLabel }}</span>
+                                <div class="grid-stack-item-content rounded border-2 p-3 shadow-sm {{ $statusClass }}">
+                                    <div class="flex items-start justify-between gap-1">
+                                        <h2 class="font-semibold pond-box-title truncate" title="{{ $pond->name }}">{{ $pond->name }}</h2>
+                                        <span class="rounded bg-white/70 font-semibold pond-box-badge shrink-0 whitespace-nowrap">{{ $statusLabel }}</span>
                                     </div>
-                                    <p class="mt-3 text-sm">Prediksi panen: {{ $pond->predicted_harvest_date?->format('d M Y') ?? 'belum cukup data' }}</p>
-                                    <p class="mt-1 text-sm">Progress: {{ $pond->harvest_progress_percent ? number_format($pond->harvest_progress_percent, 1, ',', '.') . '%' : '-' }}</p>
-                                    <div class="mt-4 flex flex-wrap gap-2">
-                                        <a href="{{ route('ponds.show', $pond) }}#feedings-section" class="inline-flex items-center justify-center rounded bg-white px-2 py-1 text-xs font-bold shadow-sm ring-1 ring-slate-200 hover:bg-slate-50">Input Pakan</a>
-                                        <a href="{{ route('ponds.edit', $pond) }}" class="inline-flex items-center justify-center rounded bg-white px-2 py-1 text-xs font-bold shadow-sm ring-1 ring-slate-200 hover:bg-slate-50">Edit</a>
+                                    <div class="mt-2 space-y-0.5 pond-box-body">
+                                        <p class="pond-box-text text-slate-700 truncate" title="Panen: {{ $pond->predicted_harvest_date?->format('d M Y') ?? 'belum cukup data' }}">
+                                            <span class="text-slate-500 font-medium">Panen:</span> 
+                                            {{ $pond->predicted_harvest_date?->format('d M Y') ?? 'belum cukup data' }}
+                                        </p>
+                                        <p class="pond-box-text text-slate-700 truncate">
+                                            <span class="text-slate-500 font-medium">Progress:</span> 
+                                            {{ $pond->harvest_progress_percent ? number_format($pond->harvest_progress_percent, 1, ',', '.') . '%' : '-' }}
+                                        </p>
+                                    </div>
+                                    <div class="mt-3 flex flex-wrap gap-1.5 pond-box-footer">
+                                        <a href="{{ route('ponds.show', $pond) }}#feedings-section" class="inline-flex items-center justify-center rounded bg-white font-bold shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 pond-box-btn">Input Pakan</a>
+                                        <a href="{{ route('ponds.edit', $pond) }}" class="inline-flex items-center justify-center rounded bg-white font-bold shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 pond-box-btn">Edit</a>
                                     </div>
                                 </div>
                             </div>
@@ -57,6 +148,7 @@
                     </div>
                 </div>
             </div>
+        </div>
 
         @endif
     </form>
@@ -246,6 +338,7 @@
 
             const viewport = document.getElementById('pondMapViewport');
             const canvas = document.getElementById('pondMapCanvas');
+            const wrapper = document.getElementById('canvasScaleWrapper');
             const zoomLabel = document.getElementById('zoomLabel');
             const toggleEditBtn = document.getElementById('toggleEditMode');
             const modeLabel = document.getElementById('modeLabel');
@@ -270,10 +363,35 @@
             };
 
             const applyZoom = (nextZoom) => {
-                zoom = Math.min(1.5, Math.max(0.1, Number(nextZoom.toFixed(2))));
-                canvas.style.zoom = zoom;
+                zoom = Math.min(1.5, Math.max(0.18, Number(nextZoom.toFixed(2))));
+                canvas.style.transform = `scale(${zoom})`;
+                canvas.style.transformOrigin = '0 0';
+
+                const fontScale = window.innerWidth < 640 ? Math.max(0.78, zoom) : zoom;
+                const padScale = window.innerWidth < 640 ? Math.max(0.72, zoom) : zoom;
+
+                canvas.style.setProperty('--pond-zoom', zoom);
+                canvas.style.setProperty('--pond-font-scale', fontScale.toFixed(2));
+                canvas.style.setProperty('--pond-pad-scale', padScale.toFixed(2));
+
+                if (wrapper && canvas) {
+                    const baseWidth = canvas.scrollWidth || canvas.offsetWidth || 1680;
+                    const baseHeight = canvas.scrollHeight || canvas.offsetHeight || 900;
+                    wrapper.style.width = `${Math.ceil(baseWidth * zoom)}px`;
+                    wrapper.style.height = `${Math.ceil(baseHeight * zoom)}px`;
+                }
+
                 zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
             };
+
+            let resizeTimer = null;
+            const resizeObserver = new ResizeObserver(() => {
+                window.clearTimeout(resizeTimer);
+                resizeTimer = window.setTimeout(() => applyZoom(zoom), 60);
+            });
+            if (canvas) {
+                resizeObserver.observe(canvas);
+            }
 
             // Toggle Mode
             toggleEditBtn.addEventListener('click', () => {
@@ -306,16 +424,26 @@
             });
 
             // Responsive Map
-            if (window.innerWidth < 640) applyZoom(0.5);
-            else if (window.innerWidth < 1024) applyZoom(0.7);
-            else applyZoom(1);
+            const initResponsiveZoom = () => {
+                if (window.innerWidth < 640) applyZoom(0.42);
+                else if (window.innerWidth < 1024) applyZoom(0.65);
+                else applyZoom(1);
+            };
+            initResponsiveZoom();
 
-            document.getElementById('zoomOut')?.addEventListener('click', () => applyZoom(zoom - 0.1));
-            document.getElementById('zoomIn')?.addEventListener('click', () => applyZoom(zoom + 0.1));
-            document.getElementById('zoomReset')?.addEventListener('click', () => applyZoom(1));
+            document.getElementById('zoomOut')?.addEventListener('click', () => applyZoom(zoom - 0.08));
+            document.getElementById('zoomIn')?.addEventListener('click', () => applyZoom(zoom + 0.08));
+            document.getElementById('zoomReset')?.addEventListener('click', () => applyZoom(window.innerWidth < 640 ? 0.42 : 1));
+
+            window.addEventListener('resize', () => {
+                window.clearTimeout(resizeTimer);
+                resizeTimer = window.setTimeout(initResponsiveZoom, 120);
+            });
 
             // Pan logic: Only active when NOT in edit mode OR when target is not a grid item
+            // Restrict custom drag-pan to mouse inputs to allow smooth native touch scrolling on mobile
             viewport?.addEventListener('pointerdown', (event) => {
+                if (event.pointerType !== 'mouse') return;
                 if (isEditMode && event.target.closest('.grid-stack-item')) return;
 
                 isPanning = true;
@@ -341,17 +469,17 @@
 
             // Prevent drag/pan interception when clicking action links
             canvas?.addEventListener('pointerdown', (e) => {
-                if (e.target.closest('a')) {
+                if (e.target.closest('a') || e.target.closest('button')) {
                     e.stopPropagation();
                 }
             }, true);
             canvas?.addEventListener('mousedown', (e) => {
-                if (e.target.closest('a')) {
+                if (e.target.closest('a') || e.target.closest('button')) {
                     e.stopPropagation();
                 }
             }, true);
             canvas?.addEventListener('click', (e) => {
-                if (e.target.closest('a')) {
+                if (e.target.closest('a') || e.target.closest('button')) {
                     e.stopPropagation();
                 }
             }, true);
