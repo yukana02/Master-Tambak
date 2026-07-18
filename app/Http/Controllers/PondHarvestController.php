@@ -16,7 +16,7 @@ class PondHarvestController extends Controller
     public function store(PondHarvestRequest $request, Pond $pond): RedirectResponse
     {
         $validated = $request->validated();
-        $pond->load('feedings');
+        $pond->load('feedings.feed.category');
 
         DB::transaction(function () use ($pond, $validated): void {
             $draftInputs = $pond->harvestInputs()->where('status', 'draft')->get();
@@ -40,6 +40,21 @@ class PondHarvestController extends Controller
                     'status' => 'final',
                 ]);
             }
+
+            // Arsipkan riwayat pakan ke pond_harvest_feedings sebelum dihapus
+            $pond->feedings->each(function ($feeding) use ($harvest): void {
+                $harvest->harvestFeedings()->create([
+                    'feed_id'            => $feeding->feed_id,
+                    'feed_name'          => $feeding->feed?->name ?? 'Pakan dihapus',
+                    'feed_category_name' => $feeding->feed?->category?->name,
+                    'fed_at'             => $feeding->fed_at,
+                    'quantity'           => $feeding->quantity,
+                    'unit'               => $feeding->unit,
+                    'feed_weight_kg'     => $feeding->feed_weight_kg,
+                    'estimated_meat_kg'  => $feeding->estimated_meat_kg,
+                    'notes'              => $feeding->notes,
+                ]);
+            });
 
             $pond->feedings()->delete();
             $pond->update([

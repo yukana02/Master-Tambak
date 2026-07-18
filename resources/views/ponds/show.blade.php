@@ -492,13 +492,13 @@
                     const total = 'Rp ' + parseFloat(input.total_price || 0).toLocaleString('id-ID', {minimumFractionDigits: 2});
                     return `*LAPORAN PANEN*
 ═══════════════
-Tanggal : ${d}
+Tanggal  : ${d}
 Bakul    : ${input.bucket_name}
 Berat    : ${kg} Kg
 Harga    : ${harga}/Kg
 Cash     : ${cash}
 Transfer : ${tf}
-*Total    : ${total}*`;
+*Total   : ${total}*`;
                 },
                 sendWA(input) {
                     const text = encodeURIComponent(this.waMessage(input));
@@ -871,7 +871,7 @@ Transfer : ${tf}
                             <th class="whitespace-nowrap px-4 py-3">Target</th>
                             <th class="whitespace-nowrap px-4 py-3">Total Pakan</th>
                             <th class="whitespace-nowrap px-4 py-3">Konversi</th>
-                            <th class="whitespace-nowrap px-4 py-3">Catatan Pakan</th>
+                            <th class="whitespace-nowrap px-4 py-3">Riwayat Pakan</th>
                             <th class="whitespace-nowrap px-4 py-3">Catatan</th>
                             <th class="whitespace-nowrap px-4 py-3"></th>
                         </tr>
@@ -887,7 +887,107 @@ Transfer : ${tf}
                                 <td class="whitespace-nowrap px-4 py-3">{{ $harvest->target_harvest_weight_kg ? number_format($harvest->target_harvest_weight_kg, 2, ',', '.') . ' kg' : '-' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ number_format($harvest->total_feed_weight_kg, 2, ',', '.') }} kg</td>
                                 <td class="whitespace-nowrap px-4 py-3">{{ number_format($harvest->total_estimated_meat_kg, 2, ',', '.') }} kg</td>
-                                <td class="whitespace-nowrap px-4 py-3">{{ $harvest->feeding_count }}</td>
+                                <td class="whitespace-nowrap px-4 py-3">
+                                    @php $harvestFeedingCount = $harvest->harvestFeedings->count(); @endphp
+                                    @if($harvestFeedingCount > 0)
+                                        @php
+                                            $hfByCategory = $harvest->harvestFeedings
+                                                ->groupBy('unit')
+                                                ->map(fn($rows) => [
+                                                    'unit'        => $rows->first()->unit,
+                                                    'total_input' => $rows->sum('quantity'),
+                                                    'total_kg'    => $rows->sum('feed_weight_kg'),
+                                                    'total_meat'  => $rows->sum('estimated_meat_kg'),
+                                                    'feeds'       => $rows
+                                                                        ->groupBy(fn($r) => $r->feed_name)
+                                                                        ->map(fn($fr) => [
+                                                                            'total_input' => $fr->sum('quantity'),
+                                                                            'total_kg'    => $fr->sum('feed_weight_kg'),
+                                                                            'unit'        => $fr->first()->unit,
+                                                                        ])
+                                                                        ->sortKeys(),
+                                                ])
+                                                ->sortKeys();
+                                            $hfByFeed = $harvest->harvestFeedings
+                                                ->groupBy(fn($hf) => $hf->feed_name)
+                                                ->map(fn($rows) => [
+                                                    'category'   => $rows->first()->feed_category_name ?? '-',
+                                                    'total_kg'   => $rows->sum('feed_weight_kg'),
+                                                    'total_meat' => $rows->sum('estimated_meat_kg'),
+                                                ]);
+                                        @endphp
+                                        <div x-data="{ showFeed: false, feedView: 'category' }">
+                                            <button @click="showFeed = true; feedView = 'category'" class="text-xs font-semibold text-emerald-700 underline hover:text-emerald-900">
+                                                Riwayat Pakan ({{ $harvestFeedingCount }})
+                                            </button>
+                                            <div x-show="showFeed" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" @click.self="showFeed = false" x-cloak>
+                                                <div class="mx-4 w-full max-w-3xl rounded-lg bg-white p-6 shadow-xl">
+                                                    {{-- Header --}}
+                                                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                                                        <h3 class="font-semibold text-slate-900">Riwayat Pakan &mdash; Siklus {{ $harvest->harvested_at->format('d/m/Y') }}</h3>
+                                                        <div class="flex items-center gap-2">
+                                                            {{-- Toggle tabs --}}
+                                                            <div class="flex gap-1 rounded-lg bg-slate-100 p-1 text-xs font-semibold">
+<button @click="feedView = 'category'"
+                                                                    :class="feedView === 'category' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'"
+                                                                    class="rounded-md px-3 py-1.5 transition">Kategori</button>
+                                                                <button @click="feedView = 'feed'"
+                                                                    :class="feedView === 'feed' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'"
+                                                                    class="rounded-md px-3 py-1.5 transition">Pakan</button>
+                                                            </div>
+                                                            <button @click="showFeed = false" class="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- View: Kategori (groupBy unit: kg/sak/tong/dll) --}}
+                                                    <div x-show="feedView === 'category'" style="display:none" class="max-h-72 overflow-y-auto space-y-3 pr-1">
+                                                        @forelse($hfByCategory as $unit => $catData)
+                                                            <div class="rounded-md bg-slate-50 p-3 text-sm ring-1 ring-slate-200">
+                                                                <div class="flex items-center justify-between gap-3">
+                                                                    <div class="font-semibold text-slate-900">{{ number_format($catData['total_input'], 2, ',', '.') }} {{ $unit }}</div>
+                                                                    <div class="shrink-0 font-bold text-slate-900">{{ number_format($catData['total_kg'], 2, ',', '.') }} kg</div>
+                                                                </div>
+                                                                <div class="mt-1 text-xs text-slate-500">Konversi daging: {{ number_format($catData['total_meat'], 2, ',', '.') }} kg</div>
+                                                                <div class="mt-2 space-y-1 text-xs text-slate-600">
+                                                                    @foreach($catData['feeds'] as $feedName => $feedData)
+                                                                        <div class="flex justify-between gap-3">
+                                                                            <span class="break-words">{{ $feedName }}</span>
+                                                                            <span class="shrink-0">{{ number_format($feedData['total_input'], 2, ',', '.') }} {{ $feedData['unit'] }} &middot; {{ number_format($feedData['total_kg'], 2, ',', '.') }} kg</span>
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        @empty
+                                                            <div class="py-8 text-center text-sm text-slate-500">Tidak ada data.</div>
+                                                        @endforelse
+                                                    </div>
+
+                                                    {{-- View: Pakan --}}
+                                                    <div x-show="feedView === 'feed'" style="display:none" class="max-h-72 overflow-y-auto space-y-3 pr-1">
+                                                        @forelse($hfByFeed as $feedName => $feedData)
+                                                            <div class="rounded-md bg-slate-50 p-3 text-sm ring-1 ring-slate-200">
+                                                                <div class="flex items-center justify-between gap-3">
+                                                                    <div class="min-w-0">
+                                                                        <div class="font-semibold text-slate-900 truncate">{{ $feedName }}</div>
+                                                                    </div>
+                                                                    <div class="shrink-0 text-right">
+                                                                        <div class="font-bold text-slate-900">{{ number_format($feedData['total_kg'], 2, ',', '.') }} kg</div>
+                                                                        <div class="text-xs text-slate-500">{{ number_format($feedData['total_meat'], 2, ',', '.') }} kg daging</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @empty
+                                                            <div class="py-8 text-center text-sm text-slate-500">Tidak ada data.</div>
+                                                        @endforelse
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <span class="text-xs text-slate-400">-</span>
+                                    @endif
+                                </td>
                                 <td class="min-w-48 px-4 py-3">{{ $harvest->notes ?: '-' }}</td>
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
                                     @php $harvestInputCount = $harvest->harvestInputs->count(); @endphp
@@ -997,8 +1097,104 @@ Transfer : ${tf}
                                     <div class="font-medium">{{ number_format($harvest->total_estimated_meat_kg, 2, ',', '.') }} kg</div>
                                 </div>
                                 <div>
-                                    <div class="text-[10px] uppercase text-slate-400 font-semibold">Catatan Pakan</div>
-                                    <div class="font-medium">{{ $harvest->feeding_count }}</div>
+                                    <div class="text-[10px] uppercase text-slate-400 font-semibold">Riwayat Pakan</div>
+                                    @php $harvestFeedingCount = $harvest->harvestFeedings->count(); @endphp
+                                    @if($harvestFeedingCount > 0)
+                                        @php
+                                            $mHfByCategory = $harvest->harvestFeedings
+                                                ->groupBy('unit')
+                                                ->map(fn($rows) => [
+                                                    'unit'        => $rows->first()->unit,
+                                                    'total_input' => $rows->sum('quantity'),
+                                                    'total_kg'    => $rows->sum('feed_weight_kg'),
+                                                    'total_meat'  => $rows->sum('estimated_meat_kg'),
+                                                    'feeds'       => $rows
+                                                                        ->groupBy(fn($r) => $r->feed_name)
+                                                                        ->map(fn($fr) => [
+                                                                            'total_input' => $fr->sum('quantity'),
+                                                                            'total_kg'    => $fr->sum('feed_weight_kg'),
+                                                                            'unit'        => $fr->first()->unit,
+                                                                        ])
+                                                                        ->sortKeys(),
+                                                ])
+                                                ->sortKeys();
+                                            $mHfByFeed = $harvest->harvestFeedings
+                                                ->groupBy(fn($hf) => $hf->feed_name)
+                                                ->map(fn($rows) => [
+                                                    'category'   => $rows->first()->feed_category_name ?? '-',
+                                                    'total_kg'   => $rows->sum('feed_weight_kg'),
+                                                    'total_meat' => $rows->sum('estimated_meat_kg'),
+                                                ]);
+                                        @endphp
+                                        <div x-data="{ showFeed: false, feedView: 'category' }">
+                                            <button @click="showFeed = true; feedView = 'category'" class="text-xs font-semibold text-emerald-700 underline hover:text-emerald-900">
+                                                Riwayat Pakan ({{ $harvestFeedingCount }})
+                                            </button>
+                                            <div x-show="showFeed" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40" @click.self="showFeed = false" x-cloak>
+                                                <div class="mx-4 w-full max-w-3xl rounded-lg bg-white p-6 shadow-xl">
+                                                    {{-- Header --}}
+                                                    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                                                        <h3 class="font-semibold text-slate-900">Riwayat Pakan &mdash; Siklus {{ $harvest->harvested_at->format('d/m/Y') }}</h3>
+                                                        <div class="flex items-center gap-2">
+                                                            <div class="flex gap-1 rounded-lg bg-slate-100 p-1 text-xs font-semibold">
+<button @click="feedView = 'category'"
+                                                                    :class="feedView === 'category' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'"
+                                                                    class="rounded-md px-3 py-1.5 transition">Kategori</button>
+                                                                <button @click="feedView = 'feed'"
+                                                                    :class="feedView === 'feed' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'"
+                                                                    class="rounded-md px-3 py-1.5 transition">Pakan</button>
+                                                            </div>
+                                                            <button @click="showFeed = false" class="text-2xl leading-none text-slate-400 hover:text-slate-600">&times;</button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div x-show="feedView === 'category'" style="display:none" class="max-h-72 overflow-y-auto space-y-3 pr-1">
+                                                        @forelse($mHfByCategory as $unit => $catData)
+                                                            <div class="rounded-md bg-slate-50 p-3 text-sm ring-1 ring-slate-200">
+                                                                <div class="flex items-center justify-between gap-3">
+                                                                    <div class="font-semibold text-slate-900">{{ number_format($catData['total_input'], 2, ',', '.') }} {{ $unit }}</div>
+                                                                    <div class="shrink-0 font-bold text-slate-900">{{ number_format($catData['total_kg'], 2, ',', '.') }} kg</div>
+                                                                </div>
+                                                                <div class="mt-1 text-xs text-slate-500">Konversi: {{ number_format($catData['total_meat'], 2, ',', '.') }} kg</div>
+                                                                <div class="mt-2 space-y-1 text-xs text-slate-600">
+                                                                    @foreach($catData['feeds'] as $feedName => $feedData)
+                                                                        <div class="flex justify-between gap-3">
+                                                                            <span class="break-words">{{ $feedName }}</span>
+                                                                            <span class="shrink-0">{{ number_format($feedData['total_input'], 2, ',', '.') }} {{ $feedData['unit'] }} &middot; {{ number_format($feedData['total_kg'], 2, ',', '.') }} kg</span>
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        @empty
+                                                            <div class="py-8 text-center text-sm text-slate-500">Tidak ada data.</div>
+                                                        @endforelse
+                                                    </div>
+
+                                                    {{-- View: Pakan --}}
+                                                    <div x-show="feedView === 'feed'" style="display:none" class="max-h-72 overflow-y-auto space-y-3 pr-1">
+                                                        @forelse($mHfByFeed as $feedName => $feedData)
+                                                            <div class="rounded-md bg-slate-50 p-3 text-sm ring-1 ring-slate-200">
+                                                                <div class="flex items-center justify-between gap-3">
+                                                                    <div class="min-w-0">
+                                                                        <div class="font-semibold text-slate-900 truncate">{{ $feedName }}</div>
+                                                                    </div>
+                                                                    <div class="shrink-0 text-right">
+                                                                        <div class="font-bold text-slate-900">{{ number_format($feedData['total_kg'], 2, ',', '.') }} kg</div>
+                                                                        <div class="text-xs text-slate-500">{{ number_format($feedData['total_meat'], 2, ',', '.') }} kg daging</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @empty
+                                                            <div class="py-8 text-center text-sm text-slate-500">Tidak ada data.</div>
+                                                        @endforelse
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="font-medium text-slate-400">-</div>
+                                    @endif
                                 </div>
                             </div>
                             @if($harvest->notes)

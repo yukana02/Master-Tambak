@@ -32,4 +32,9 @@ class PondHarvest extends Model
     {
         return $this->hasMany(PondHarvestInput::class);
     }
+
+    public function harvestFeedings(): HasMany
+    {
+        return $this->hasMany(PondHarvestFeeding::class);
+    }
 }
